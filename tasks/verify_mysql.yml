@@ -2,11 +2,7 @@
 # tasks file for run_query
 - name: Create table
   run_query:
-      servername: "{{ item.servername }}"
-      database: "{{ item.database }}"
-      username: "{{ item.username }}"
-      password: "{{ item.password }}"
-      dbtype: "{{ item.dbtype }}"
+      config: "{{ item }}"
       query: >
          create table if not exists log (
              id INT NOT NULL AUTO_INCREMENT,
@@ -20,20 +16,12 @@
 
 - name: Insert date
   run_query:
-      servername: "{{ item.servername }}"
-      database: "{{ item.database }}"
-      username: "{{ item.username }}"
-      password: "{{ item.password }}"
-      dbtype: "{{ item.dbtype }}"
+      config: "{{ item }}"
       query: "insert into log (line) values ('{{ date }}')"
 
 - name: Retrieve date
   run_query:
-      servername: "{{ item.servername }}"
-      database: "{{ item.database }}"
-      username: "{{ item.username }}"
-      password: "{{ item.password }}"
-      dbtype: "{{ item.dbtype }}"
+      config: "{{ item }}"
       query: "select line from log order by id desc limit 1"
   register: select
 
