@@ -140,14 +140,14 @@ def run_query(query, values, config):
     results = []
     modified = False
     with connect(conn_str) as cur:
-        res = cur.execute(query, *values)
+        cur.execute(query, *values)
         try:
             # Will raise an exception if the query doesn't return results
             results = list(map(row_to_dict, cur.fetchall()))
-            modified = res.rowcount > 0
+            modified = False
         except pyodbc.Error:
             results = []
-            modified = False
+            modified = cur.rowcount > 0
     return results, modified
 
 
