@@ -81,7 +81,10 @@ output:
 '''
 
 CONSTR = 'DRIVER={driver};DATABASE={db};UID={user};PWD={pwd};SERVER={server}'
-DBTYPES = ['mssql', 'mysql']
+DRIVERS = {
+    'mysql': '{MySQL ODBC 8.0 Unicode Driver}',
+    'mssql': '{FreeTDS}',
+}
 
 
 @contextmanager
@@ -143,8 +146,8 @@ def run_module():
 
     # manipulate or modify the state as needed (this is going to be the
     # part where your module will do what it needs to do)
-    if module.params['dbtype'].lower() not in DBTYPES:
-        result['msg'] = 'DB type must be one of ' + str(DBTYPES)
+    if module.params['dbtype'].lower() not in DRIVERS:
+        result['msg'] = 'DB type must be one of {}'.format(list(DRIVERS))
         module.fail_json(**result)
 
     config = {
@@ -152,7 +155,7 @@ def run_module():
         'pwd': module.params['password'],
         'db': module.params['database'],
         'server': module.params['servername'],
-        'dbtype': module.params['dbtype'],
+        'driver': DRIVERS[module.params['dbtype']],
     }
     try:
         results, modified = run_query(module.params['query'], config)
