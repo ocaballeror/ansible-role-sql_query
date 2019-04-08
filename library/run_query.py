@@ -98,6 +98,13 @@ def connect(connection_string, autocommit=True):
             yield cursor
 
 
+def row_to_dict(row):
+    """
+    Convert a pyodbc Row object to a dictionary.
+    """
+    return dict(zip([t[0] for t in row.cursor_description], row))
+
+
 def run_query(query, config):
     """
     Execute the query with the specified config dictionary.
@@ -107,13 +114,13 @@ def run_query(query, config):
     modified = False
     with connect(conn_str) as cur:
         res = cur.execute(query)
-        # modify operations return the number of modifications in "rowcount",
-        # but will raise on .fetchall(). read operations return rowcount = -1,
-        # and the results with .fetchall()
-        if res.rowcount == -1:
-            results = res.fetchall()
-        else:
+        try:
+            # Will raise an exception if the query doesn't return results
+            results = list(map(row_to_dict, cur.fetchall()))
             modified = res.rowcount > 0
+        except pyodbc.Error:
+            results = []
+            modified = False
     return results, modified
 
 
@@ -164,7 +171,7 @@ def run_module():
         module.fail_json(msg=msg, **result)
 
     result['changed'] = modified
-    result['output'] = '\n'.join(results)
+    result['output'] = results
 
     # in the event of a successful module execution, you will want to
     # simple AnsibleModule.exit_json(), passing the key/value results
