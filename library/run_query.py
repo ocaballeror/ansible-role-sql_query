@@ -20,8 +20,8 @@ description:
 
 options:
     config:
-        description: A dictionary with all the database configuration
-        parameters described below
+        description: A dictionary with all the database configuration \
+                     parameters described below
     servername:
         description: The hostname of the server to target
         notes:
