@@ -25,7 +25,9 @@
       username: "{{ item.username }}"
       password: "{{ item.password }}"
       dbtype: "{{ item.dbtype }}"
-      query: "insert into log values ('{{ date }}')"
+      query: "insert into log values (?)"
+      values:
+          - "{{ date }}"
 
 - name: Retrieve date
   run_query:

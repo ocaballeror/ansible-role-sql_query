@@ -17,7 +17,9 @@
 - name: Insert date
   run_query:
       config: "{{ item }}"
-      query: "insert into log (line) values ('{{ date }}')"
+      query: "insert into log (line) values (?)"
+      values:
+          - "{{ date }}"
 
 - name: Retrieve date
   run_query:
