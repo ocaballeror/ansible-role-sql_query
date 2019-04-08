@@ -1,0 +1,12 @@
+---
+- name: Run query
+  run_query:
+      config: "{{ config | default({}) }}"
+      servername: "{{ servername | default('') }}"
+      database: "{{ database | default('') }}"
+      username: "{{ username | default('') }}"
+      password: "{{ password | default('') }}"
+      dbtype: "{{ dbtype | default('') }}"
+      query: "{{ query | default('') }}"
+      values: "{{ values | default([]) }}"
+  register: run_query_output
