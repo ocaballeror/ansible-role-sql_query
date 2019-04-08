@@ -1,0 +1,8 @@
+---
+- name: Verify mysql
+  include_tasks: verify_mysql.yml
+  loop: "{{ mysql_configs }}"
+
+- name: Verify mssql
+  include_tasks: verify_mssql.yml
+  loop: "{{ mssql_configs }}"
