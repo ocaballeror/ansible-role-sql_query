@@ -172,7 +172,9 @@ def get_config(module):
         if module.params.get(k, None):
             config[v] = module.params[k]
 
-    missing = [k for k in mapping.values() if not config.get(k, '')]
+    # Find missing or empty configuration values
+    r_mapping = {v: k for k, v in mapping.items()}
+    missing = [r_mapping[k] for k in r_mapping if not config.get(k, '')]
     if missing:
         result['output'] = str(config)
         result['msg'] = 'Missing configuration parameters: {}'.format(missing)
