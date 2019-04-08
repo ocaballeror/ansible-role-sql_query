@@ -37,12 +37,6 @@
       query: "select top 1 line from log order by id desc"
   register: select
 
-- debug:
-    var: select
-
-- debug:
-    var: date
-
 - name: Verify selection
   assert:
       that: "select.output[0].line == date"

@@ -25,12 +25,6 @@
       query: "select line from log order by id desc limit 1"
   register: select
 
-- debug:
-    var: select
-
-- debug:
-    var: date
-
 - name: Verify selection
   assert:
       that: "select.output[0].line == date"
