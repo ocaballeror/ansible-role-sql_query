@@ -158,6 +158,7 @@ def get_config(module):
     """
     result = dict(changed=False, output='')
     config = module.params.get('config', None) or {}
+    config = config.copy()
     mapping = {
         'username': 'user',
         'password': 'pwd',
