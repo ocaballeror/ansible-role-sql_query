@@ -40,6 +40,10 @@ options:
     query:
         description: The actual query to run
         required: true
+    values:
+        description: List of variables to substitute in the query
+        type: list
+        required: false
 
 notes:
     - Needs the odbc binary to be installed
@@ -128,7 +132,7 @@ def row_to_dict(row):
     return dict(zip([t[0] for t in row.cursor_description], row))
 
 
-def run_query(query, config):
+def run_query(query, values, config):
     """
     Execute the query with the specified config dictionary.
     """
@@ -136,7 +140,7 @@ def run_query(query, config):
     results = []
     modified = False
     with connect(conn_str) as cur:
-        res = cur.execute(query)
+        res = cur.execute(query, *values)
         try:
             # Will raise an exception if the query doesn't return results
             results = list(map(row_to_dict, cur.fetchall()))
@@ -192,6 +196,7 @@ def run_module():
         password=dict(type='str', required=False),
         dbtype=dict(type='str', required=False),
         query=dict(type='str', required=True),
+        values=dict(type='list', required=False, default=[]),
     )
 
     result = dict(changed=False, output='')
@@ -212,7 +217,8 @@ def run_module():
 
     config = get_config(module)
     try:
-        results, modified = run_query(module.params['query'], config)
+        query, values = module.params['query'], module.params['values']
+        results, modified = run_query(query, values, config)
     except Exception as e:
         msg = '{}: {}'.format(type(e), str(e))
         module.fail_json(msg=msg, **result)
