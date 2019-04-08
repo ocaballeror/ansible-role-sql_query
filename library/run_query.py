@@ -5,7 +5,7 @@ import pyodbc
 from ansible.module_utils.basic import AnsibleModule
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.0', 'status': ['stableinterface']}
+ANSIBLE_METADATA = {'metadata_version': '1.0', 'status': ['beta']}
 
 DOCUMENTATION = '''
 ---
@@ -19,22 +19,19 @@ description:
     - Execute a query on a database
 
 options:
+    config:
+        description: A dictionary with all the database configuration
+        parameters described below
     servername:
-        description:
-            - The hostname of the server to target
+        description: The hostname of the server to target
         notes:
             - For mssql servers, include the database instance as well
-        required: true
     database:
-        description:
-            - Database name
-        required: true
+        description: Database name
     user:
         description: User name
-        required: true
     password:
         description: Database password
-        required: true
     dbtype:
         description: Database technology
         choices:
@@ -48,6 +45,10 @@ notes:
     - Needs the odbc binary to be installed
     - Needs the appropriate drivers for each database type
     - Needs the pyodbc python package
+    - The config dictionary can contain as many of the other database
+      configuration params as you want. You can mix and match, but the params
+      you specify separately will take preference over 'config'.
+    - Whether separately, or inside 'config', all parameters are required.
 
 author:
     - Oscar Caballero (ocaballeror@tutanota.com)
@@ -65,6 +66,7 @@ EXAMPLES = r'''
     query: 'delete from table where 1 = 1'
 
 # Select data and register the result
+- name: Select data
   run_query:
     servername: mysql-server.domain.com
     database: db_test
@@ -73,6 +75,27 @@ EXAMPLES = r'''
     dbtype: mysql
     query: 'select * from table'
   register: query_output
+
+# Run multiple queries with the same configuration
+- block:
+  - name: Set config
+    set_fact:
+      config:
+        servername: server.domain.com\instance
+        database: db_test
+        username: sa
+        password: Passw0rd
+        dbtype: mssql
+
+  - name: Execute query
+    run_query:
+      config: "{{ config }}"
+      query: 'insert into table values ("a")'
+
+  - name: Execute query
+    run_query:
+      config: "{{ config }}"
+      query: 'insert into table values ("b")'
 '''
 
 RETURN = '''
@@ -124,14 +147,50 @@ def run_query(query, config):
     return results, modified
 
 
+def get_config(module):
+    """
+    Parse the configuration received by the module. Create the necessary
+    mappings and fail if any argument is missing.
+    """
+    result = dict(changed=False, output='')
+    config = module.params.get('config', None) or {}
+    print('config', config)
+    mapping = {
+        'username': 'user',
+        'password': 'pwd',
+        'database': 'db',
+        'servername': 'server',
+        'dbtype': 'driver',
+    }
+    for k, v in mapping.items():
+        if k in config:
+            config[v] = config.pop(k)
+        if module.params.get(k, None):
+            config[v] = module.params[k]
+
+    missing = [k for k in mapping.values() if not config.get(k, '')]
+    if missing:
+        result['output'] = str(config)
+        result['msg'] = 'Missing configuration parameters: {}'.format(missing)
+        module.fail_json(**result)
+
+    if config['driver'].lower() not in DRIVERS:
+        result['msg'] = 'DB type must be one of {}'.format(list(DRIVERS))
+        module.fail_json(**result)
+    config['driver'] = DRIVERS[config['driver'].lower()]
+    return config
+
+
+
 def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
-        servername=dict(type='str', required=True),
-        database=dict(type='str', required=True),
-        username=dict(type='str', required=True),
-        password=dict(type='str', required=True),
-        dbtype=dict(type='str', required=True),
+        config=dict(type='dict', required=False),
+        servername=dict(type='str', required=False),
+        database=dict(type='str', required=False),
+        username=dict(type='str', required=False),
+        password=dict(type='str', required=False),
+        dbtype=dict(type='str', required=False),
         query=dict(type='str', required=True),
     )
 
@@ -151,19 +210,7 @@ def run_module():
     # if module.check_mode:
     #     return result
 
-    # manipulate or modify the state as needed (this is going to be the
-    # part where your module will do what it needs to do)
-    if module.params['dbtype'].lower() not in DRIVERS:
-        result['msg'] = 'DB type must be one of {}'.format(list(DRIVERS))
-        module.fail_json(**result)
-
-    config = {
-        'user': module.params['username'],
-        'pwd': module.params['password'],
-        'db': module.params['database'],
-        'server': module.params['servername'],
-        'driver': DRIVERS[module.params['dbtype']],
-    }
+    config = get_config(module)
     try:
         results, modified = run_query(module.params['query'], config)
     except Exception as e:
