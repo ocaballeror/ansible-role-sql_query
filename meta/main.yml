@@ -1,6 +1,6 @@
 galaxy_info:
   author: Oscar Caballero
-  description: your description
+  description: Run sql queries on any type of database
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
