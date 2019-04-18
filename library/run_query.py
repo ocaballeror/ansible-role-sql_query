@@ -208,14 +208,14 @@ def run_module():
     # args/params passed to the execution, as well as if the module
     # supports check mode
     module = AnsibleModule(
-        argument_spec=module_args, supports_check_mode=False
+        argument_spec=module_args, supports_check_mode=True
     )
 
     # if the user is working with this module in only check mode we do not
     # want to make any changes to the environment, just return the current
     # state with no modifications
-    # if module.check_mode:
-    #     return result
+    if module.check_mode:
+        module.exit_json(**result)
 
     config = get_config(module)
     try:
