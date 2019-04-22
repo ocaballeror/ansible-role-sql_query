@@ -10,3 +10,7 @@
       query: "{{ query | default('') }}"
       values: "{{ values | default([]) }}"
   register: run_query_output
+
+- name: Set rows variable
+  set_fact:
+      query_rows: "{{ run_query_output.output }}"
