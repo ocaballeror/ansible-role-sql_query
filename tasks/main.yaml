@@ -1,5 +1,6 @@
 ---
 - name: Run query
+  delegate_to: "{{ delegate | default('localhost') }}"
   run_query:
       config: "{{ config | default({}) }}"
       servername: "{{ servername | default('') }}"
