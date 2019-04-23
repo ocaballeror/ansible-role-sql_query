@@ -53,6 +53,10 @@ notes:
       configuration params as you want. You can mix and match, but the params
       you specify separately will take preference over 'config'.
     - Whether separately, or inside 'config', all parameters are required.
+    - It is recommended that you use the "values" keyword to interpolate
+      variables rather than placing them in the query string yourself. This
+      ensures they are properly quoted and protects you against sql injection
+      attacks.
 
 author:
     - Oscar Caballero (ocaballeror@tutanota.com)
@@ -79,6 +83,15 @@ EXAMPLES = r'''
     dbtype: mysql
     query: 'select * from table'
   register: query_output
+
+# Interpolate variables (recommended)
+- name: Select with variable escaping
+  run_query:
+    config: ...
+    query: select * from table where col = ? or col = ?
+    values:
+      - "{{ variable1 }}"
+      - "{{ variable2 }}"
 
 # Run multiple queries with the same configuration
 - block:
