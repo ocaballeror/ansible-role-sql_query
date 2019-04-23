@@ -128,12 +128,13 @@ DRIVERS = {
 
 
 @contextmanager
-def connect(connection_string, autocommit=True):
+def connect(config, autocommit=True):
     """
     Connect to a database with the given connection string and yield a valid
     cursor to be used in a context.
     """
-    with pyodbc.connect(connection_string, autocommit=autocommit) as conn:
+    conn_str = CONSTR.format(**config)
+    with pyodbc.connect(conn_str, autocommit=autocommit) as conn:
         with conn.cursor() as cursor:
             yield cursor
 
@@ -149,10 +150,9 @@ def run_query(query, values, config):
     """
     Execute the query with the specified config dictionary.
     """
-    conn_str = CONSTR.format(**config)
     results = []
     modified = False
-    with connect(conn_str) as cur:
+    with connect(config) as cur:
         cur.execute(query, *values)
         try:
             # Will raise an exception if the query doesn't return results
