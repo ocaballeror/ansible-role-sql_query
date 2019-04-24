@@ -68,8 +68,8 @@ EXAMPLES = r'''
   run_query:
     servername: server.domain.com\instance
     database: db_test
-    username: sa
-    password: Passw0rd
+    username: rbamouser\itsme
+    password: My_AD_Password123
     dbtype: mssql
     query: 'delete from table where 1 = 1'
 
@@ -134,6 +134,8 @@ def connect(config, autocommit=True):
     cursor to be used in a context.
     """
     conn_str = CONSTR.format(**config)
+    if config['driver'].lower() == '{freetds}' and '\\' in config['user']:
+        conn_str += ';Disable loopback check=yes'
     with pyodbc.connect(conn_str, autocommit=autocommit) as conn:
         with conn.cursor() as cursor:
             yield cursor
