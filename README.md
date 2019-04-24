@@ -71,8 +71,8 @@ Examples
   run_query:
     servername: server.domain.com\instance
     database: db_test
-    username: sa
-    password: Passw0rd
+    username: rbamouser\itsme
+    password: My_AD_Password123
     dbtype: mssql
     query: 'delete from table where 1 = 1'
 
