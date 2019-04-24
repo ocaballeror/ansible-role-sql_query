@@ -1,7 +1,7 @@
 ---
 - name: Run query
   delegate_to: "{{ delegate | default('localhost') }}"
-  run_query:
+  sql_query:
       config: "{{ config | default({}) }}"
       servername: "{{ servername | default('') }}"
       database: "{{ database | default('') }}"
@@ -10,8 +10,8 @@
       dbtype: "{{ dbtype | default('') }}"
       query: "{{ query | default('') }}"
       values: "{{ values | default([]) }}"
-  register: run_query_output
+  register: sql_query_output
 
 - name: Set rows variable
   set_fact:
-      query_rows: "{{ run_query_output.output }}"
+      query_rows: "{{ sql_query_output.output }}"

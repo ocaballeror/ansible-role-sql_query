@@ -9,7 +9,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.0', 'status': ['beta']}
 
 DOCUMENTATION = '''
 ---
-module: run_query
+module: sql_query
 
 short_description: Execute a query on a database
 
@@ -65,7 +65,7 @@ author:
 EXAMPLES = r'''
 # Run a simple query
 - name: Execute query
-  run_query:
+  sql_query:
     servername: server.domain.com\instance
     database: db_test
     username: rbamouser\itsme
@@ -75,7 +75,7 @@ EXAMPLES = r'''
 
 # Select data and register the result
 - name: Select data
-  run_query:
+  sql_query:
     servername: mysql-server.domain.com
     database: db_test
     username: sa
@@ -86,7 +86,7 @@ EXAMPLES = r'''
 
 # Interpolate variables (recommended)
 - name: Select with variable escaping
-  run_query:
+  sql_query:
     config: ...
     query: select * from table where col = ? or col = ?
     values:
@@ -105,12 +105,12 @@ EXAMPLES = r'''
         dbtype: mssql
 
   - name: Execute query
-    run_query:
+    sql_query:
       config: "{{ config }}"
       query: 'insert into table values ("a")'
 
   - name: Execute query
-    run_query:
+    sql_query:
       config: "{{ config }}"
       query: 'insert into table values ("b")'
 '''
@@ -210,7 +210,7 @@ def run_module():
         servername=dict(type='str', required=False),
         database=dict(type='str', required=False),
         username=dict(type='str', required=False),
-        password=dict(type='str', required=False),
+        password=dict(type='str', required=False, no_log=True),
         dbtype=dict(type='str', required=False),
         query=dict(type='str', required=True),
         values=dict(type='list', required=False, default=[]),
