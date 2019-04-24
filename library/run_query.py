@@ -210,7 +210,7 @@ def run_module():
         servername=dict(type='str', required=False),
         database=dict(type='str', required=False),
         username=dict(type='str', required=False),
-        password=dict(type='str', required=False),
+        password=dict(type='str', required=False, no_log=True),
         dbtype=dict(type='str', required=False),
         query=dict(type='str', required=True),
         values=dict(type='list', required=False, default=[]),
