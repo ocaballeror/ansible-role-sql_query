@@ -11,7 +11,7 @@ DOCUMENTATION = '''
 ---
 module: run_query
 
-short_description: Set maintenance mode on a target server.
+short_description: Execute a query on a database
 
 version_added: "2.4"
 
