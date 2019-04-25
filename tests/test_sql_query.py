@@ -8,12 +8,12 @@ import pytest
 
 root = (os.path.split(__file__)[0] or '.') + '/..'
 sys.path.append(root)
-from library import run_query
-from library.run_query import DOCUMENTATION
-from library.run_query import EXAMPLES
-from library.run_query import RETURN
-from library.run_query import DRIVERS
-from library.run_query import get_config
+from library import sql_query
+from library.sql_query import DOCUMENTATION
+from library.sql_query import EXAMPLES
+from library.sql_query import RETURN
+from library.sql_query import DRIVERS
+from library.sql_query import get_config
 
 
 INTERNAL_CONFIG = {
@@ -72,14 +72,14 @@ def test_docs():
 
 
 def test_run_query(monkeypatch):
-    monkeypatch.setattr(run_query, 'connect', lambda x: FakeCursor())
-    assert ([], False) == run_query.run_query('select', [], INTERNAL_CONFIG)
-    assert ([], True) == run_query.run_query('delete', [], INTERNAL_CONFIG)
+    monkeypatch.setattr(sql_query, 'connect', lambda x: FakeCursor())
+    assert ([], False) == sql_query.run_query('select', [], INTERNAL_CONFIG)
+    assert ([], True) == sql_query.run_query('delete', [], INTERNAL_CONFIG)
 
     # Set rowcount to 0 so it's not marked as modified
-    monkeypatch.setattr(run_query, 'connect', lambda x: FakeCursor(0))
-    assert ([], False) == run_query.run_query('select', [], INTERNAL_CONFIG)
-    assert ([], False) == run_query.run_query('delete', [], INTERNAL_CONFIG)
+    monkeypatch.setattr(sql_query, 'connect', lambda x: FakeCursor(0))
+    assert ([], False) == sql_query.run_query('select', [], INTERNAL_CONFIG)
+    assert ([], False) == sql_query.run_query('delete', [], INTERNAL_CONFIG)
 
 
 def test_get_config():
