@@ -50,7 +50,7 @@ Either way, all connnection parameters are, obviously, required.
 
 This role sets two variables as output:
 
-- `run_query_output`: Contains all the information returned by the `run_query`
+- `sql_query_output`: Contains all the information returned by the `sql_query`
   module
 - `query_rows`: If the query returns results, contains the list of returned rows
   as `key=value` dictionaries
@@ -68,7 +68,7 @@ Examples
 ```yml
 # Run a simple query
 - name: Execute query
-  run_query:
+  sql_query:
     servername: server.domain.com\instance
     database: db_test
     username: rbamouser\itsme
@@ -78,7 +78,7 @@ Examples
 
 # Select data and register the result
 - name: Select data
-  run_query:
+  sql_query:
     servername: mysql-server.domain.com
     database: db_test
     username: sa
@@ -92,7 +92,7 @@ Examples
 
 # Interpolate variables (recommended)
 - name: Select with variable escaping
-  run_query:
+  sql_query:
     config: ...
     query: select * from table where col = ? or col = ?
     values:
@@ -110,12 +110,12 @@ Examples
       dbtype: mssql
 
 - name: Execute query
-  run_query:
+  sql_query:
     config: "{{ config }}"
     query: 'insert into table values ("a")'
 
 - name: Execute query
-  run_query:
+  sql_query:
     config: "{{ config }}"
     query: 'insert into table values ("b")'
 ```
