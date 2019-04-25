@@ -68,7 +68,9 @@ Examples
 ```yml
 # Run a simple query
 - name: Execute query
-  sql_query:
+  include_role:
+    name: sql_query
+  vars:
     servername: server.domain.com\instance
     database: db_test
     username: rbamouser\itsme
@@ -76,23 +78,27 @@ Examples
     dbtype: mssql
     query: 'delete from table where 1 = 1'
 
-# Select data and register the result
+# Select data and print the result
 - name: Select data
-  sql_query:
+  include_role:
+    name: sql_query
+  vars:
     servername: mysql-server.domain.com
     database: db_test
     username: sa
     password: Passw0rd
     dbtype: mysql
     query: 'select * from table'
-  register: query_output
 
+# This variable is created automatically by the role
 - debug:
-    var: query_output
+    var: query_rows
 
 # Interpolate variables (recommended)
 - name: Select with variable escaping
-  sql_query:
+  include_role:
+    name: sql_query
+  vars:
     config: ...
     query: select * from table where col = ? or col = ?
     values:
@@ -110,12 +116,16 @@ Examples
       dbtype: mssql
 
 - name: Execute query
-  sql_query:
+  include_role:
+    name: sql_query
+  vars:
     config: "{{ config }}"
     query: 'insert into table values ("a")'
 
 - name: Execute query
-  sql_query:
+  include_role:
+    name: sql_query
+  vars:
     config: "{{ config }}"
     query: 'insert into table values ("b")'
 ```
