@@ -134,7 +134,8 @@ def connect(config, autocommit=True):
     cursor to be used in a context.
     """
     conn_str = CONSTR.format(**config)
-    if config['driver'].lower() == '{freetds}' and '\\' in config['user']:
+    driver = config['driver'].lower()
+    if driver == DRIVERS['mssql'].lower() and '\\' in config['user']:
         conn_str += ';Disable loopback check=yes'
     with pyodbc.connect(conn_str, autocommit=autocommit) as conn:
         with conn.cursor() as cursor:
