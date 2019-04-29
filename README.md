@@ -4,8 +4,8 @@ Run query
 Execute a SQL query on a database.
 
 Supported database types (any reasonably recent version should work):
-- MySQL
-- SQL Server
+- MySQL (Tested versions 5 and 8)
+- SQL Server (Tested 2012, 2014, 2016 and linux v17)
 
 Requirements
 ------------
