@@ -102,13 +102,20 @@ def test_get_config():
     assert get_config(module) == other_expect
 
 
-def test_get_config_errors():
-    # Empty dictionary
+def test_get_config_empty():
+    """
+    Test that get_config raises an error when given an empty dictionary.
+    """
     module = FakeModule({})
     with pytest.raises(SystemExit) as error:
         get_config(module)
     assert 'fail_json' in str(error.value)
 
+
+def test_get_config_missing_required():
+    """
+    Check that get_config raises an error when a required key is missing.
+    """
     # Check that all the keys are required
     for key in PARAM_CONFIG:
         config = PARAM_CONFIG.copy()
@@ -119,7 +126,11 @@ def test_get_config_errors():
         assert 'fail_json' in str(error.value)
         assert key in str(error.value)
 
-    # Try an invalid database name
+
+def test_get_config_invalid_database():
+    """
+    Check that get_config raises an error when passing an unknown dbtype.
+    """
     db = 'this is not a valid database'
     config = PARAM_CONFIG.copy()
     config['dbtype'] = db
