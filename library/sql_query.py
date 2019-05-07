@@ -33,6 +33,9 @@ options:
         description: The hostname of the server to target
         notes:
             - For mssql servers, include the database instance as well
+    port:
+        description: Server port number
+        type: int
     database:
         description: Database name
     username:
@@ -161,6 +164,7 @@ ARG_MAPPING = {
     'database': 'database',
     'servername': 'server',
     'dbtype': 'driver',
+    'port': 'port',
     'odbc_opts': 'odbc_opts',
 }
 
@@ -307,6 +311,7 @@ def run_module():
         config=dict(type='dict', required=False),
         dsn=dict(type='str', required=False),
         servername=dict(type='str', required=False),
+        port=dict(type='int', required=False),
         database=dict(type='str', required=False),
         username=dict(type='str', required=False),
         password=dict(type='str', required=False, no_log=True),
