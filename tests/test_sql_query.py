@@ -109,6 +109,35 @@ def test_get_config(drivers):
     assert get_config({'config': config, 'username': username}) == other_expect
 
 
+@pytest.mark.parametrize('key', ['port'])
+def test_key_not_required(drivers, key):
+    """
+    Check that the port is not required, even though it can be passed as part
+    of the config dictionary.
+    """
+    config = PARAM_CONFIG.copy()
+    expect = INTERNAL_CONFIG.copy()
+    expect['driver'] = sql_query.DRIVERS['mysql']
+
+    # Specify the port directly
+    config[key] = expect[key] = key
+    assert get_config(config) == expect
+
+    # Specify the port in config dict
+    assert get_config({'config': config}) == expect
+
+    # Specify the port in config and override it
+    assert get_config({'config': config, key: key}) == expect
+
+    # Try a config with no port number
+    config.pop(key, None)
+    expect.pop(key, None)
+    assert get_config({'config': config}) == expect
+
+    # Try with direct arguments and no port number
+    assert get_config(config) == expect
+
+
 def test_get_config_empty(drivers):
     """
     Test that get_config raises an error when given an empty dictionary.
