@@ -123,7 +123,6 @@ output:
 '''
 
 ODBCINST = '/etc/odbcinst.ini'
-CONSTR = 'DRIVER={driver};DATABASE={db};UID={user};PWD={pwd};SERVER={server}'
 DRIVERS = {
     'mysql': None,
     'mssql': None,
@@ -186,13 +185,19 @@ def connect(config, autocommit=True):
     Connect to a database with the given connection string and yield a valid
     cursor to be used in a context.
     """
-    conn_str = CONSTR.format(**config)
+    conn_str = connection_string(config)
     driver = config['driver'].lower()
     if driver == DRIVERS['mssql'].lower() and '\\' in config['uid']:
         conn_str += ';Disable loopback check=yes'
     with pyodbc.connect(conn_str, autocommit=autocommit) as conn:
         with conn.cursor() as cursor:
             yield cursor
+
+
+def connection_string(config):
+    template = ";".join('{}={}'.format(k.upper(), v)
+                        for k, v in config.items())
+    return template
 
 
 def row_to_dict(row):
