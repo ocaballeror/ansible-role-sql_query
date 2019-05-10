@@ -69,6 +69,12 @@ class FakeModule:
         raise SystemExit('fail_json: {}'.format(kwargs))
 
 
+@pytest.fixture
+def drivers(monkeypatch):
+    drivers = {k: k for k in DRIVERS}
+    monkeypatch.setattr(sql_query, 'DRIVERS', drivers)
+
+
 def test_docs():
     assert yaml.safe_load(StringIO(DOCUMENTATION))
     assert yaml.safe_load(StringIO(EXAMPLES))
@@ -86,10 +92,10 @@ def test_run_query(monkeypatch):
     assert ([], False) == sql_query.run_query('delete', [], INTERNAL_CONFIG)
 
 
-def test_get_config():
+def test_get_config(drivers):
     config = PARAM_CONFIG.copy()
     expect = INTERNAL_CONFIG.copy()
-    expect['driver'] = DRIVERS['mysql']
+    expect['driver'] = sql_query.DRIVERS['mysql']
     assert get_config(config) == expect
     assert get_config({'config': config}) == expect
 
@@ -101,7 +107,7 @@ def test_get_config():
     assert get_config({'config': config, 'username': username}) == other_expect
 
 
-def test_get_config_empty():
+def test_get_config_empty(drivers):
     """
     Test that get_config raises an error when given an empty dictionary.
     """
@@ -111,7 +117,7 @@ def test_get_config_empty():
 
 
 @pytest.mark.parametrize('key', PARAM_CONFIG)
-def test_get_config_missing_required(key):
+def test_get_config_missing_required(key, drivers):
     """
     Check that get_config raises an error when a required key is missing.
     """
