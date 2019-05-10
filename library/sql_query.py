@@ -132,7 +132,7 @@ ARG_MAPPING = {
     'dsn': 'dsn',
     'username': 'uid',
     'password': 'pwd',
-    'database': 'db',
+    'database': 'database',
     'servername': 'server',
     'dbtype': 'driver',
 }
@@ -188,7 +188,7 @@ def connect(config, autocommit=True):
     """
     conn_str = CONSTR.format(**config)
     driver = config['driver'].lower()
-    if driver == DRIVERS['mssql'].lower() and '\\' in config['user']:
+    if driver == DRIVERS['mssql'].lower() and '\\' in config['uid']:
         conn_str += ';Disable loopback check=yes'
     with pyodbc.connect(conn_str, autocommit=autocommit) as conn:
         with conn.cursor() as cursor:
