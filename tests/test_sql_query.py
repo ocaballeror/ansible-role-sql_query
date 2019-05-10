@@ -7,6 +7,7 @@ import yaml
 import pyodbc
 import pytest
 
+# flake8: noqa: E402
 root = (os.path.split(__file__)[0] or '.') + '/..'
 sys.path.append(root)
 from library import sql_query
