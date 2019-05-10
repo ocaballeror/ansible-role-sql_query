@@ -3,7 +3,7 @@ pipeline {
 	stages {
 		stage('Setup') {
 			steps {
-				sh "/opt/python3/bin/pip install --user --upgrade pytest flake8"
+				sh "/opt/python3/bin/pip install --upgrade -r requirements_dev.txt"
 			}
 		}
 		stage('Lint') {
