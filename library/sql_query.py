@@ -278,6 +278,9 @@ def run_module():
 
     find_drivers()
     config = get_config(module)
+    if not config['driver']:
+        result['msg'] = 'No driver found for dbtype in {}'.format(ODBCINST)
+        module.fail_json(**result)
     try:
         query, values = module.params['query'], module.params['values']
         results, modified = run_query(query, values, config)
