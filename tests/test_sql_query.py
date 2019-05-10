@@ -142,6 +142,16 @@ def test_get_config_invalid_database():
     assert 'must be one of' in str(error.value)
 
 
+def assert_driver(monkeypatch, keys, expect, driver):
+    with NamedTemporaryFile(mode='w+') as tmp:
+        for key in keys:
+            tmp.write('{}\nkey=value\n'.format(key))
+        tmp.flush()
+        monkeypatch.setattr(sql_query, 'ODBCINST', tmp.name)
+        find_drivers()
+        assert sql_query.DRIVERS[driver] == expect
+
+
 @pytest.mark.parametrize('keys, expect', [
     (['[MySQL 5]', '[MySQL]'], 'MySQL 5'),
     (['[MySQL 5.1]', '[MySQL 5]'], 'MySQL 5.1'),
@@ -154,13 +164,7 @@ def test_get_config_invalid_database():
     'Only match mysql drivers',
 ])
 def test_find_driver_mysql(monkeypatch, keys, expect):
-    with NamedTemporaryFile(mode='w+') as tmp:
-        for key in keys:
-            tmp.write('{}\nkey=value\n'.format(key))
-        tmp.flush()
-        monkeypatch.setattr(sql_query, 'ODBCINST', tmp.name)
-        find_drivers()
-        assert sql_query.DRIVERS['mysql'] == expect
+    assert_driver(monkeypatch, keys, expect, 'mysql')
 
 
 @pytest.mark.parametrize('keys, expect', [
@@ -177,10 +181,4 @@ def test_find_driver_mysql(monkeypatch, keys, expect):
     'Only match sql server drivers',
 ])
 def test_find_driver_mssql(monkeypatch, keys, expect):
-    with NamedTemporaryFile(mode='w+') as tmp:
-        for key in keys:
-            tmp.write('{}\nkey=value\n'.format(key))
-        tmp.flush()
-        monkeypatch.setattr(sql_query, 'ODBCINST', tmp.name)
-        find_drivers()
-        assert sql_query.DRIVERS['mssql'] == expect
+    assert_driver(monkeypatch, keys, expect, 'mssql')
