@@ -15,23 +15,24 @@ from library.sql_query import DOCUMENTATION
 from library.sql_query import EXAMPLES
 from library.sql_query import RETURN
 from library.sql_query import DRIVERS
+from library.sql_query import ModuleError
 from library.sql_query import get_config
 from library.sql_query import find_drivers
 
 
 INTERNAL_CONFIG = {
     'driver': 'mysql',
-    'db': 'db',
-    'user': 'user',
+    'database': 'database',
+    'uid': 'uid',
     'pwd': 'pwd',
     'server': 'server',
 }
 PARAM_CONFIG = {
-    'username': 'user',
+    'username': 'uid',
     'password': 'pwd',
     'dbtype': 'mysql',
     'servername': 'server',
-    'database': 'db',
+    'database': 'database',
 }
 
 
@@ -89,30 +90,24 @@ def test_get_config():
     config = PARAM_CONFIG.copy()
     expect = INTERNAL_CONFIG.copy()
     expect['driver'] = DRIVERS['mysql']
-
-    module = FakeModule(config)
-    assert get_config(module) == expect
-
-    module = FakeModule({'config': config})
-    assert get_config(module) == expect
+    assert get_config(config) == expect
+    assert get_config({'config': config}) == expect
 
     username = 'other user'
     other_config = config.copy()
     other_expect = expect.copy()
     other_config['user'] = username
-    other_expect['user'] = username
-    module = FakeModule({'config': config, 'username': username})
-    assert get_config(module) == other_expect
+    other_expect['uid'] = username
+    assert get_config({'config': config, 'username': username}) == other_expect
 
 
 def test_get_config_empty():
     """
     Test that get_config raises an error when given an empty dictionary.
     """
-    module = FakeModule({})
-    with pytest.raises(SystemExit) as error:
-        get_config(module)
-    assert 'fail_json' in str(error.value)
+    with pytest.raises(ModuleError) as error:
+        get_config({})
+    assert 'Missing configuration parameter' in str(error.value)
 
 
 @pytest.mark.parametrize('key', PARAM_CONFIG)
@@ -122,10 +117,9 @@ def test_get_config_missing_required(key):
     """
     config = PARAM_CONFIG.copy()
     config.pop(key)
-    module = FakeModule(config)
-    with pytest.raises(SystemExit) as error:
-        get_config(module)
-    assert 'fail_json' in str(error.value)
+    with pytest.raises(ModuleError) as error:
+        get_config(config)
+    assert 'Missing configuration parameter' in str(error.value)
     assert key in str(error.value)
 
 
@@ -136,10 +130,8 @@ def test_get_config_invalid_database():
     db = 'this is not a valid database'
     config = PARAM_CONFIG.copy()
     config['dbtype'] = db
-    module = FakeModule(config)
-    with pytest.raises(SystemExit) as error:
-        get_config(module)
-    assert 'fail_json' in str(error.value)
+    with pytest.raises(ModuleError) as error:
+        get_config(config)
     assert 'must be one of' in str(error.value)
 
 

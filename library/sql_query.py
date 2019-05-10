@@ -234,19 +234,18 @@ def require_args(config, args):
         raise ModuleError(msg)
 
 
-def get_config(module):
+def get_config(params):
     """
     Parse the configuration received by the module. Create the necessary
     mappings and fail if any argument is missing.
     """
-    result = dict(changed=False, output='')
-    config = module.params.get('config', None) or {}
+    config = params.get('config', None) or {}
     config = config.copy()
     for k, v in ARG_MAPPING.items():
         if k in config:
             config[v] = config.pop(k)
-        if module.params.get(k, None):
-            config[v] = module.params[k]
+        if params.get(k, None):
+            config[v] = params[k]
     require_args(config, ['uid', 'pwd'])
 
     if config.get('dsn', False):
@@ -256,12 +255,12 @@ def get_config(module):
     require_args(config, ['database', 'server', 'driver'])
 
     if config['driver'].lower() not in DRIVERS:
-        result['msg'] = 'DB type must be one of {}'.format(list(DRIVERS))
-        module.fail_json(**result)
+        msg = 'DB type must be one of {}'.format(list(DRIVERS))
+        raise ModuleError(msg)
     config['driver'] = DRIVERS[config['driver'].lower()]
     if not config['driver']:
-        result['msg'] = 'No driver found for dbtype in {}'.format(ODBCINST)
-        module.fail_json(**result)
+        msg = 'No driver found for dbtype in {}'.format(ODBCINST)
+        raise ModuleError(msg)
     return config
 
 
@@ -296,8 +295,8 @@ def run_module():
         module.exit_json(**result)
 
     find_drivers()
-    config = get_config(module)
     try:
+        config = get_config(module.params)
         query, values = module.params['query'], module.params['values']
         results, modified = run_query(query, values, config)
     except Exception as e:
