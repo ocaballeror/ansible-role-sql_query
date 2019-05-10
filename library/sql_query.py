@@ -30,7 +30,7 @@ options:
             - For mssql servers, include the database instance as well
     database:
         description: Database name
-    user:
+    username:
         description: User name
     password:
         description: Database password
