@@ -28,7 +28,7 @@ Role Variables
 
 - `password`: Database password
 
-- `user`: User name
+- `username`: User name
 
 - `servername`: The hostname of the server to target
 	note: For mssql servers, include the database instance as well
