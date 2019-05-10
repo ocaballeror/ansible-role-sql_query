@@ -1,4 +1,6 @@
 #!/usr/bin/python
+import re
+from configparser import ConfigParser
 from contextlib import contextmanager
 
 import pyodbc
@@ -120,11 +122,50 @@ output:
     description: Query results (if applicable)
 '''
 
+ODBCINST = '/etc/odbcinst.ini'
 CONSTR = 'DRIVER={driver};DATABASE={db};UID={user};PWD={pwd};SERVER={server}'
 DRIVERS = {
-    'mysql': '{MySQL ODBC 8.0 Unicode Driver}',
-    'mssql': '{FreeTDS}',
+    'mysql': None,
+    'mssql': None,
 }
+
+
+def normalize_version(v):
+    "Return a proper version number"
+    if not v:
+        return [0]
+    return [int(x) for x in re.sub(r'(\.0+)*$', '', v).split('.')]
+
+
+def best_driver(parser, search):
+    """
+    Find the newest driver whose name matches a search regex.
+    """
+    drivers = [s for s in parser.sections()
+               if re.search(search, s, flags=re.I)]
+    versions = []
+    for section in drivers:
+        version = normalize_version(re.sub(r'[^\d\.]', '', section))
+        versions.append((version, section))
+
+    if not versions:
+        return None
+    best = sorted(versions, reverse=True)[0][-1]
+    return best
+
+
+def find_drivers():
+    """
+    Fill the DRIVERS dictionary with the best driver for every db type.
+    """
+    parser = ConfigParser()
+    with open(ODBCINST) as f:
+        parser.read_file(f)
+
+    DRIVERS['mysql'] = best_driver(parser, 'mysql')
+    DRIVERS['mssql'] = best_driver(parser, 'freetds')
+    if not DRIVERS['mssql']:
+        DRIVERS['mssql'] = best_driver(parser, 'sql server')
 
 
 @contextmanager
@@ -235,6 +276,7 @@ def run_module():
     if module.check_mode:
         module.exit_json(**result)
 
+    find_drivers()
     config = get_config(module)
     try:
         query, values = module.params['query'], module.params['values']
