@@ -14,7 +14,7 @@ pipeline {
 		stage('Test') {
 			steps {
 				ansiColor('xterm') {
-					sh "/opt/python3/bin/pytest -v --color=yes"
+					sh "/opt/python3/bin/pytest -v -rs --color=yes"
 				}
 			}
 		}
