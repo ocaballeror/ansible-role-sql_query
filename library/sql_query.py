@@ -146,6 +146,8 @@ def row_to_dict(row):
     """
     Convert a pyodbc Row object to a dictionary.
     """
+    if row is None:
+        return None
     return dict(zip([t[0] for t in row.cursor_description], row))
 
 
