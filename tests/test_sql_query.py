@@ -112,19 +112,18 @@ def test_get_config_empty():
     assert 'fail_json' in str(error.value)
 
 
-def test_get_config_missing_required():
+@pytest.mark.parametrize('key', PARAM_CONFIG)
+def test_get_config_missing_required(key):
     """
     Check that get_config raises an error when a required key is missing.
     """
-    # Check that all the keys are required
-    for key in PARAM_CONFIG:
-        config = PARAM_CONFIG.copy()
-        config.pop(key)
-        module = FakeModule(config)
-        with pytest.raises(SystemExit) as error:
-            get_config(module)
-        assert 'fail_json' in str(error.value)
-        assert key in str(error.value)
+    config = PARAM_CONFIG.copy()
+    config.pop(key)
+    module = FakeModule(config)
+    with pytest.raises(SystemExit) as error:
+        get_config(module)
+    assert 'fail_json' in str(error.value)
+    assert key in str(error.value)
 
 
 def test_get_config_invalid_database():
