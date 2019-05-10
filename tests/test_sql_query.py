@@ -1,6 +1,7 @@
 import os
 import sys
 from io import StringIO
+from tempfile import NamedTemporaryFile
 
 import yaml
 import pyodbc
@@ -14,6 +15,7 @@ from library.sql_query import EXAMPLES
 from library.sql_query import RETURN
 from library.sql_query import DRIVERS
 from library.sql_query import get_config
+from library.sql_query import find_drivers
 
 
 INTERNAL_CONFIG = {
@@ -138,3 +140,47 @@ def test_get_config_invalid_database():
         get_config(module)
     assert 'fail_json' in str(error.value)
     assert 'must be one of' in str(error.value)
+
+
+@pytest.mark.parametrize('keys, expect', [
+    (['[MySQL 5]', '[MySQL]'], 'MySQL 5'),
+    (['[MySQL 5.1]', '[MySQL 5]'], 'MySQL 5.1'),
+    (['[MySQL 8 Driver]', '[ODBC MySQL 5]'], 'MySQL 8 Driver'),
+    (['[MySQL 5]', '[ODBC Driver 5]'], 'MySQL 5'),
+], ids=[
+    'Version better than no version',
+    'version.1 better than bare version',
+    'Parse with extra info in names',
+    'Only match mysql drivers',
+])
+def test_find_driver_mysql(monkeypatch, keys, expect):
+    with NamedTemporaryFile(mode='w+') as tmp:
+        for key in keys:
+            tmp.write('{}\nkey=value\n'.format(key))
+        tmp.flush()
+        monkeypatch.setattr(sql_query, 'ODBCINST', tmp.name)
+        find_drivers()
+        assert sql_query.DRIVERS['mysql'] == expect
+
+
+@pytest.mark.parametrize('keys, expect', [
+    (['[FreeTDS]', '[SQL Server 18.1]'], 'FreeTDS'),
+    (['[FreeTDS 3]', '[SQL Server 18.1]'], 'FreeTDS 3'),
+    (['[SQL Server 18]', '[SQL Server 13]'], 'SQL Server 18'),
+    (['[SQL Server]', '[SQL Server 1]'], 'SQL Server 1'),
+    (['[SQL Server]', '[MySQL]'], 'SQL Server'),
+], ids=[
+    'FreeTDS over sql server',
+    'Versioned FreeTDS over sql server',
+    'Pick newest sql server',
+    'Version better than no version',
+    'Only match sql server drivers',
+])
+def test_find_driver_mssql(monkeypatch, keys, expect):
+    with NamedTemporaryFile(mode='w+') as tmp:
+        for key in keys:
+            tmp.write('{}\nkey=value\n'.format(key))
+        tmp.flush()
+        monkeypatch.setattr(sql_query, 'ODBCINST', tmp.name)
+        find_drivers()
+        assert sql_query.DRIVERS['mssql'] == expect
