@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import re
+import os
 from configparser import ConfigParser
 from contextlib import contextmanager
 
@@ -155,7 +156,7 @@ output:
     description: Query results (if applicable)
 '''
 
-ODBCINST = '/etc/odbcinst.ini'
+ODBCINST = ['/etc/odbcinst.ini', '/usr/local/etc/odbcinst.ini', '~/.odbc.ini']
 DRIVERS = {'mysql': None, 'mssql': None, 'oracle': None}
 ARG_MAPPING = {
     'dsn': 'dsn',
@@ -203,8 +204,12 @@ def find_drivers():
     Fill the DRIVERS dictionary with the best driver for every db type.
     """
     parser = ConfigParser()
-    with open(ODBCINST) as f:
-        parser.read_file(f)
+    for filename in ODBCINST:
+        filename = os.path.expanduser(filename)
+        if not os.path.isfile(filename):
+            continue
+        with open(filename) as f:
+            parser.read_file(f)
 
     DRIVERS['mysql'] = best_driver(parser, 'mysql')
     DRIVERS['oracle'] = best_driver(parser, 'oracle')

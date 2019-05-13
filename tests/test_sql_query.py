@@ -177,7 +177,7 @@ def assert_driver(monkeypatch, keys, expect, driver):
         for key in keys:
             tmp.write('{}\nkey=value\n'.format(key))
         tmp.flush()
-        monkeypatch.setattr(sql_query, 'ODBCINST', tmp.name)
+        monkeypatch.setattr(sql_query, 'ODBCINST', [tmp.name])
         find_drivers()
         assert sql_query.DRIVERS[driver] == expect
 
