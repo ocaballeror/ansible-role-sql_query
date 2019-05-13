@@ -15,9 +15,11 @@ from library.sql_query import DOCUMENTATION
 from library.sql_query import EXAMPLES
 from library.sql_query import RETURN
 from library.sql_query import DRIVERS
+from library.sql_query import ARG_MAPPING
 from library.sql_query import ModuleError
 from library.sql_query import get_config
 from library.sql_query import find_drivers
+from library.sql_query import connection_string
 
 
 INTERNAL_CONFIG = {
@@ -189,3 +191,46 @@ def test_find_driver_mysql(monkeypatch, keys, expect):
 )
 def test_find_driver_mssql(monkeypatch, keys, expect):
     assert_driver(monkeypatch, keys, expect, 'mssql')
+
+
+@pytest.mark.parametrize(
+    'config',
+    [
+        {'dsn': 'asdf'},
+        {'dsn': 'asdf', 'username': 'asdf'},
+        {'dsn': 'asdf', 'password': 'asdf'},
+    ],
+    ids=['missing username and pwd', 'missing pwd', 'missing username'],
+)
+def test_dsn_config_error(config):
+    with pytest.raises(ModuleError):
+        get_config(config)
+
+
+@pytest.mark.parametrize(
+    'config',
+    [
+        {'dsn': 'asdf', 'password': 'asdf', 'username': 'asdf'},
+        {
+            'dsn': 'asdf',
+            'password': 'asdf',
+            'username': 'asdf',
+            'servername': 'asdf',
+        },
+        {
+            'dsn': 'what',
+            'database': 'asdf',
+            'dbtype': 'mssql',
+            'password': 'asdf',
+            'username': 'asdf',
+            'servername': 'asdf',
+        },
+    ],
+)
+def test_dsn_config(config):
+    parsed = get_config(config)
+    connstr = connection_string(parsed).lower() + ';'
+    assert 'dsn' in connstr
+    for key, value in config.items():
+        key = ARG_MAPPING[key]
+        assert '{}={};'.format(key, value) in connstr
