@@ -21,6 +21,8 @@ Role Variables
 - `config`: A dictionary with all the database configuration parameters
   described below
 
+- `dsn`: Use a pre-defined DataSourceName in your odbc configuration
+
 - `database`: Database name
 
 - `dbtype`: Database technology
@@ -77,6 +79,30 @@ Examples
     password: My_AD_Password123
     dbtype: mssql
     query: 'delete from table where 1 = 1'
+
+# Use a pre-defined DSN
+- name: Use my DSN
+  include_role:
+    name: sql_query
+  vars:
+    dsn: some_server
+  query: 'exec dbo.NukeAllTables @force=yes'
+  # Username and password are still required
+  username: root
+  password: root
+
+# Override any DSN preferences
+- name: Override my DSN
+  include_role:
+    name: sql_query
+  vars:
+    dsn: some_server
+  query: 'exec dbo.NukeAllTables @force=yes'
+  username: root
+  password: root
+  # Override any parameters you want
+  servername: server.domain.com\INST
+  driver: CustomDriver
 
 # Select data and print the result
 - name: Select data

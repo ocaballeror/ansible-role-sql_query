@@ -24,6 +24,11 @@ options:
     config:
         description: A dictionary with all the database configuration \
                      parameters described below
+
+    dsn:
+        description: Use a pre-defined DataSourceName in your odbc config
+        notes:
+            - Any other parameters you specify will override your config
     servername:
         description: The hostname of the server to target
         notes:
@@ -51,6 +56,8 @@ notes:
     - Needs the odbc binary to be installed
     - Needs the appropriate drivers for each database type
     - Needs the pyodbc python package
+    - Username and password are required for now, even if you use a pre-defined
+      dsn. You shouldn't have your plain-text credentials in those files anyway
     - The config dictionary can contain as many of the other database
       configuration params as you want. You can mix and match, but the params
       you specify separately will take preference over 'config'.
@@ -85,6 +92,30 @@ EXAMPLES = r'''
     dbtype: mysql
     query: 'select * from table'
   register: query_output
+
+# Use a pre-defined DSN
+- name: Use my DSN
+  include_role:
+    name: sql_query
+  vars:
+    dsn: some_server
+  query: 'exec dbo.NukeAllTables @force=yes'
+  # Username and password are still required
+  username: root
+  password: root
+
+# Override any DSN preferences
+- name: Override my DSN
+  include_role:
+    name: sql_query
+  vars:
+    dsn: some_server
+  query: 'exec dbo.NukeAllTables @force=yes'
+  username: root
+  password: root
+  # Override any parameters you want
+  servername: server.domain.com\INST
+  driver: CustomDriver
 
 # Interpolate variables (recommended)
 - name: Select with variable escaping
