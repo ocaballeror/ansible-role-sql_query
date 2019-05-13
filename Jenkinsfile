@@ -8,6 +8,7 @@ pipeline {
 		}
 		stage('Lint') {
 			steps {
+				sh "ANSIBLE_LIBRARY=library /opt/python3/bin/ansible-doc -t module sql_query"
 				sh "/opt/python3/bin/flake8 --select=E,F,W,N,B,B902,T"
 			}
 		}
