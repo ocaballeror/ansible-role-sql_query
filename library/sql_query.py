@@ -168,6 +168,7 @@ ARG_MAPPING = {
     'database': 'database',
     'servername': 'server',
     'dbtype': 'driver',
+    'odbc_opts': 'odbc_opts',
 }
 
 
@@ -285,7 +286,7 @@ def get_config(params):
             config[v] = config.pop(k)
         if params.get(k, None):
             config[v] = params[k]
-    for k, v in params.get('odbc_opts', {}).items():
+    for k, v in config.get('odbc_opts', {}).items():
         config[k] = v
     require_args(config, ['uid', 'pwd'])
 
