@@ -99,10 +99,10 @@ EXAMPLES = r'''
     name: sql_query
   vars:
     dsn: some_server
-  query: 'exec dbo.NukeAllTables @force=yes'
-  # Username and password are still required
-  username: root
-  password: root
+    query: 'exec dbo.NukeAllTables @force=yes'
+    # Username and password are still required
+    username: root
+    password: root
 
 # Override any DSN preferences
 - name: Override my DSN
@@ -110,12 +110,12 @@ EXAMPLES = r'''
     name: sql_query
   vars:
     dsn: some_server
-  query: 'exec dbo.NukeAllTables @force=yes'
-  username: root
-  password: root
-  # Override any parameters you want
-  servername: server.domain.com\INST
-  driver: CustomDriver
+    query: 'exec dbo.NukeAllTables @force=yes'
+    username: root
+    password: root
+    # Override any parameters you want
+    servername: server.domain.com\INST
+    driver: CustomDriver
 
 # Interpolate variables (recommended)
 - name: Select with variable escaping
