@@ -153,10 +153,7 @@ output:
 '''
 
 ODBCINST = '/etc/odbcinst.ini'
-DRIVERS = {
-    'mysql': None,
-    'mssql': None,
-}
+DRIVERS = {'mysql': None, 'mssql': None}
 ARG_MAPPING = {
     'dsn': 'dsn',
     'username': 'uid',
@@ -183,8 +180,9 @@ def best_driver(parser, search):
     """
     Find the newest driver whose name matches a search regex.
     """
-    drivers = [s for s in parser.sections()
-               if re.search(search, s, flags=re.I)]
+    drivers = [
+        s for s in parser.sections() if re.search(search, s, flags=re.I)
+    ]
     versions = []
     for section in drivers:
         version = normalize_version(re.sub(r'[^\d\.]', '', section))
@@ -226,8 +224,9 @@ def connection_string(config):
     driver = config.get('driver', '').lower()
     if driver == DRIVERS['mssql'].lower() and '\\' in config.get('uid', ''):
         config['Disable loopback check'] = 'yes'
-    template = ";".join('{}={}'.format(k.upper(), v)
-                        for k, v in config.items())
+    template = ";".join(
+        '{}={}'.format(k.upper(), v) for k, v in config.items()
+    )
     return template
 
 
@@ -323,9 +322,7 @@ def run_module():
     # this includes instantiation, a couple of common attr would be the
     # args/params passed to the execution, as well as if the module
     # supports check mode
-    module = AnsibleModule(
-        argument_spec=module_args, supports_check_mode=True
-    )
+    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
 
     # if the user is working with this module in only check mode we do not
     # want to make any changes to the environment, just return the current
