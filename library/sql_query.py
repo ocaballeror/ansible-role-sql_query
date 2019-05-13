@@ -96,30 +96,6 @@ EXAMPLES = r'''
     query: 'select * from table'
   register: query_output
 
-# Use a pre-defined DSN
-- name: Use my DSN
-  include_role:
-    name: sql_query
-  vars:
-    dsn: some_server
-    query: 'exec dbo.NukeAllTables @force=yes'
-    # Username and password are still required
-    username: root
-    password: root
-
-# Override any DSN preferences
-- name: Override my DSN
-  include_role:
-    name: sql_query
-  vars:
-    dsn: some_server
-    query: 'exec dbo.NukeAllTables @force=yes'
-    username: root
-    password: root
-    # Override any parameters you want
-    servername: server.domain.com\INST
-    driver: CustomDriver
-
 # Interpolate variables (recommended)
 - name: Select with variable escaping
   sql_query:
@@ -149,6 +125,30 @@ EXAMPLES = r'''
     sql_query:
       config: "{{ config }}"
       query: 'insert into table values ("b")'
+
+# Use a pre-defined DSN
+- name: Use my DSN
+  include_role:
+    name: sql_query
+  vars:
+    dsn: some_server
+    query: 'exec dbo.NukeAllTables @force=yes'
+    # Username and password are still required
+    username: root
+    password: root
+
+# Override any DSN preferences
+- name: Override my DSN
+  include_role:
+    name: sql_query
+  vars:
+    dsn: some_server
+    query: 'exec dbo.NukeAllTables @force=yes'
+    username: root
+    password: root
+    # Override any parameters you want
+    servername: server.domain.com\INST
+    driver: CustomDriver
 '''
 
 RETURN = '''

@@ -82,30 +82,6 @@ Examples
     dbtype: mssql
     query: 'delete from table where 1 = 1'
 
-# Use a pre-defined DSN
-- name: Use my DSN
-  include_role:
-    name: sql_query
-  vars:
-    dsn: some_server
-    query: 'exec dbo.NukeAllTables @force=yes'
-    # Username and password are still required
-    username: root
-    password: root
-
-# Override any DSN preferences
-- name: Override my DSN
-  include_role:
-    name: sql_query
-  vars:
-    dsn: some_server
-    query: 'exec dbo.NukeAllTables @force=yes'
-    username: root
-    password: root
-    # Override any parameters you want
-    servername: server.domain.com\INST
-    driver: CustomDriver
-
 # Select data and print the result
 - name: Select data
   include_role:
@@ -156,6 +132,30 @@ Examples
   vars:
     config: "{{ config }}"
     query: 'insert into table values ("b")'
+
+# Use a pre-defined DSN
+- name: Use my DSN
+  include_role:
+    name: sql_query
+  vars:
+    dsn: some_server
+    query: 'exec dbo.NukeAllTables @force=yes'
+    # Username and password are still required
+    username: root
+    password: root
+
+# Override any DSN preferences
+- name: Override my DSN
+  include_role:
+    name: sql_query
+  vars:
+    dsn: some_server
+    query: 'exec dbo.NukeAllTables @force=yes'
+    username: root
+    password: root
+    # Override any parameters you want
+    servername: server.domain.com\INST
+    driver: CustomDriver
 ```
 
 License
