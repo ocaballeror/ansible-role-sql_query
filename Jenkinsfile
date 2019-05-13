@@ -4,6 +4,7 @@ pipeline {
 		stage('Setup') {
 			steps {
 				sh "/opt/python3/bin/pip install --upgrade -r requirements_dev.txt"
+				sh "/opt/python2/bin/pip install --upgrade -r requirements_dev.txt"
 			}
 		}
 		stage('Lint') {
@@ -20,6 +21,7 @@ pipeline {
 			steps {
 				ansiColor('xterm') {
 					sh "/opt/python3/bin/pytest -v -rs --color=yes"
+					sh "/opt/python2/bin/pytest -v -rs --color=yes"
 				}
 			}
 		}
