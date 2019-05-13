@@ -128,9 +128,7 @@ EXAMPLES = r'''
 
 # Use a pre-defined DSN
 - name: Use my DSN
-  include_role:
-    name: sql_query
-  vars:
+  sql_query:
     dsn: some_server
     query: 'exec dbo.NukeAllTables @force=yes'
     # Username and password are still required
@@ -139,9 +137,7 @@ EXAMPLES = r'''
 
 # Override any DSN preferences
 - name: Override my DSN
-  include_role:
-    name: sql_query
-  vars:
+  sql_query:
     dsn: some_server
     query: 'exec dbo.NukeAllTables @force=yes'
     username: root
