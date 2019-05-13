@@ -26,14 +26,14 @@ Role Variables
 - `database`: Database name
 
 - `dbtype`: Database technology
-	(Choices: mssql, mysql)
+  (Choices: mssql, mysql)
 
 - `password`: Database password
 
 - `username`: User name
 
 - `servername`: The hostname of the server to target
-	note: For mssql servers, include the database instance as well
+  note: For mssql servers, include the database instance as well
 
 - `query`: The actual query to run
 
