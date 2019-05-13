@@ -183,22 +183,30 @@ def assert_driver(monkeypatch, keys, expect, driver):
 
 
 @pytest.mark.parametrize(
-    'keys, expect',
+    'dbtype, keys, expect',
     [
-        (['[MySQL 5]', '[MySQL]'], '{MySQL 5}'),
-        (['[MySQL 5.1]', '[MySQL 5]'], '{MySQL 5.1}'),
-        (['[MySQL 8 Driver]', '[ODBC MySQL 5]'], '{MySQL 8 Driver}'),
-        (['[MySQL 5]', '[ODBC Driver 5]'], '{MySQL 5}'),
+        ('mysql', ['[MySQL 5]', '[MySQL]'], '{MySQL 5}'),
+        ('mysql', ['[MySQL 5.1]', '[MySQL 5]'], '{MySQL 5.1}'),
+        ('mysql', ['[MySQL 8 Driver]', '[ODBC MySQL 5]'], '{MySQL 8 Driver}'),
+        ('mysql', ['[MySQL 5]', '[ODBC Driver 5]'], '{MySQL 5}'),
+        ('oracle', ['[Oracle 18]', '[Oracle 12.2g]'], '{Oracle 18}'),
+        (
+            'oracle',
+            ['[Oracle 19 ODBC driver]', '[Oracle 18]'],
+            '{Oracle 19 ODBC driver}',
+        ),
     ],
     ids=[
         'Version better than no version',
         'version.1 better than bare version',
         'Parse with extra info in names',
         'Only match mysql drivers',
+        'Oracle 18',
+        'Oracle 19',
     ],
 )
-def test_find_driver_mysql(monkeypatch, keys, expect):
-    assert_driver(monkeypatch, keys, expect, 'mysql')
+def test_find_driver(monkeypatch, dbtype, keys, expect):
+    assert_driver(monkeypatch, keys, expect, dbtype)
 
 
 @pytest.mark.parametrize(
