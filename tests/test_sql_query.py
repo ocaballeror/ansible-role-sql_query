@@ -151,33 +151,41 @@ def assert_driver(monkeypatch, keys, expect, driver):
         assert sql_query.DRIVERS[driver] == expect
 
 
-@pytest.mark.parametrize('keys, expect', [
-    (['[MySQL 5]', '[MySQL]'], 'MySQL 5'),
-    (['[MySQL 5.1]', '[MySQL 5]'], 'MySQL 5.1'),
-    (['[MySQL 8 Driver]', '[ODBC MySQL 5]'], 'MySQL 8 Driver'),
-    (['[MySQL 5]', '[ODBC Driver 5]'], 'MySQL 5'),
-], ids=[
-    'Version better than no version',
-    'version.1 better than bare version',
-    'Parse with extra info in names',
-    'Only match mysql drivers',
-])
+@pytest.mark.parametrize(
+    'keys, expect',
+    [
+        (['[MySQL 5]', '[MySQL]'], '{MySQL 5}'),
+        (['[MySQL 5.1]', '[MySQL 5]'], '{MySQL 5.1}'),
+        (['[MySQL 8 Driver]', '[ODBC MySQL 5]'], '{MySQL 8 Driver}'),
+        (['[MySQL 5]', '[ODBC Driver 5]'], '{MySQL 5}'),
+    ],
+    ids=[
+        'Version better than no version',
+        'version.1 better than bare version',
+        'Parse with extra info in names',
+        'Only match mysql drivers',
+    ],
+)
 def test_find_driver_mysql(monkeypatch, keys, expect):
     assert_driver(monkeypatch, keys, expect, 'mysql')
 
 
-@pytest.mark.parametrize('keys, expect', [
-    (['[FreeTDS]', '[SQL Server 18.1]'], 'FreeTDS'),
-    (['[FreeTDS 3]', '[SQL Server 18.1]'], 'FreeTDS 3'),
-    (['[SQL Server 18]', '[SQL Server 13]'], 'SQL Server 18'),
-    (['[SQL Server]', '[SQL Server 1]'], 'SQL Server 1'),
-    (['[SQL Server]', '[MySQL]'], 'SQL Server'),
-], ids=[
-    'FreeTDS over sql server',
-    'Versioned FreeTDS over sql server',
-    'Pick newest sql server',
-    'Version better than no version',
-    'Only match sql server drivers',
-])
+@pytest.mark.parametrize(
+    'keys, expect',
+    [
+        (['[FreeTDS]', '[SQL Server 18.1]'], '{FreeTDS}'),
+        (['[FreeTDS 3]', '[SQL Server 18.1]'], '{FreeTDS 3}'),
+        (['[SQL Server 18]', '[SQL Server 13]'], '{SQL Server 18}'),
+        (['[SQL Server]', '[SQL Server 1]'], '{SQL Server 1}'),
+        (['[SQL Server]', '[MySQL]'], '{SQL Server}'),
+    ],
+    ids=[
+        'FreeTDS over sql server',
+        'Versioned FreeTDS over sql server',
+        'Pick newest sql server',
+        'Version better than no version',
+        'Only match sql server drivers',
+    ],
+)
 def test_find_driver_mssql(monkeypatch, keys, expect):
     assert_driver(monkeypatch, keys, expect, 'mssql')
