@@ -186,8 +186,8 @@ def connect(config, autocommit=True):
     cursor to be used in a context.
     """
     conn_str = connection_string(config)
-    driver = config['driver'].lower()
-    if driver == DRIVERS['mssql'].lower() and '\\' in config['uid']:
+    driver = config.get('driver', '').lower()
+    if driver == DRIVERS['mssql'].lower() and '\\' in config.get('uid', ''):
         conn_str += ';Disable loopback check=yes'
     with pyodbc.connect(conn_str, autocommit=autocommit) as conn:
         with conn.cursor() as cursor:
