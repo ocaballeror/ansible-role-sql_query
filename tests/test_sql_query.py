@@ -234,3 +234,16 @@ def test_dsn_config(config):
     for key, value in config.items():
         key = ARG_MAPPING[key]
         assert '{}={};'.format(key, value) in connstr
+
+
+def test_odbc_opts_config():
+    config = PARAM_CONFIG.copy()
+    opts = {'ansinpw': 1, 'tds_version': '7.0'}
+    config['odbc_opts'] = opts
+    parsed = get_config(config)
+    assert parsed['ansinpw'] == 1
+    assert parsed['tds_version'] == '7.0'
+
+    connstr = connection_string(parsed).lower() + ';'
+    assert ';ansinpw=1;' in connstr
+    assert ';tds_version=7.0;' in connstr

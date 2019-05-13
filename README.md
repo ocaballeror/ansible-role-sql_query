@@ -37,6 +37,8 @@ Role Variables
 
 - `query`: The actual query to run
 
+- `odbc_opts`: Extra odbc options to include in the connection string
+
 - `values`: List of variables to substitute in the query
 
 - `delegate`: Specify the host to run the query from. Defaults to localhost.

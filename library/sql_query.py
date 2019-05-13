@@ -44,6 +44,9 @@ options:
         choices:
             - mssql
             - mysql
+    odbc_opts:
+        description: Extra odbc options to include in the connection string
+        type: dict
     query:
         description: The actual query to run
         required: true
@@ -282,6 +285,8 @@ def get_config(params):
             config[v] = config.pop(k)
         if params.get(k, None):
             config[v] = params[k]
+    for k, v in params.get('odbc_opts', {}).items():
+        config[k] = v
     require_args(config, ['uid', 'pwd'])
 
     if config.get('dsn', False):
@@ -310,6 +315,7 @@ def run_module():
         username=dict(type='str', required=False),
         password=dict(type='str', required=False, no_log=True),
         dbtype=dict(type='str', required=False),
+        odbc_opts=dict(type='dict', required=False),
         query=dict(type='str', required=True),
         values=dict(type='list', required=False, default=[]),
     )
