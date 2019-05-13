@@ -47,11 +47,10 @@ class FakeCursor:
         self.rowcount = rowcount
 
     def __enter__(self):
-        print('before')
         return self
 
     def __exit__(self, *args):
-        print('after', *args)
+        pass
 
     def execute(self, query, *args):
         if query.lower().startswith('select'):
