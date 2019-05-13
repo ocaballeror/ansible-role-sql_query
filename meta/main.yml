@@ -6,14 +6,7 @@ galaxy_info:
   # next line and provide a value
   # issue_tracker_url: http://example.com/issue/tracker
 
-  # Some suggested licenses:
-  # - BSD (default)
-  # - MIT
-  # - GPLv2
-  # - GPLv3
-  # - Apache
-  # - CC-BY
-  license: license (GPLv2, CC-BY, etc)
+  license: Apache 2.0
 
   min_ansible_version: 1.2
 
@@ -31,17 +24,8 @@ galaxy_info:
   #
   # platforms is a list of platforms, and each platform has a name and a list of versions.
   #
-  # platforms:
-  # - name: Fedora
-  #   versions:
-  #   - all
-  #   - 25
-  # - name: SomePlatform
-  #   versions:
-  #   - all
-  #   - 1.0
-  #   - 7
-  #   - 99.99
+  platforms:
+    - name: all
 
   galaxy_tags: []
     # List tags for your role here, one per line. A tag is a keyword that describes
