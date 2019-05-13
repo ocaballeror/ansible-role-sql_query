@@ -162,7 +162,7 @@ def best_driver(parser, search):
     if not versions:
         return None
     best = sorted(versions, reverse=True)[0][-1]
-    return best
+    return '{{{}}}'.format(best)
 
 
 def find_drivers():
