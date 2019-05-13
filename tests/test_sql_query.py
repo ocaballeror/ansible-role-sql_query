@@ -236,14 +236,33 @@ def test_dsn_config(config):
         assert '{}={};'.format(key, value) in connstr
 
 
-def test_odbc_opts_config():
+def assert_in_config(key, value, config):
+    parsed = get_config(config)
+    assert parsed[key] == value
+    connstr = connection_string(parsed).lower() + ';'
+    assert ';{}={};'.format(key, value) in connstr
+
+
+def test_odbc_opts():
     config = PARAM_CONFIG.copy()
     opts = {'ansinpw': 1, 'tds_version': '7.0'}
     config['odbc_opts'] = opts
-    parsed = get_config(config)
-    assert parsed['ansinpw'] == 1
-    assert parsed['tds_version'] == '7.0'
+    assert_in_config('ansinpw', 1, config)
+    assert_in_config('tds_version', '7.0', config)
 
-    connstr = connection_string(parsed).lower() + ';'
-    assert ';ansinpw=1;' in connstr
-    assert ';tds_version=7.0;' in connstr
+
+def test_odbc_opts_config():
+    config = PARAM_CONFIG.copy()
+    opts = {'ansinpw': 1, 'tds_version': '7.0'}
+    config['config'] = {'odbc_opts': opts}
+    assert_in_config('ansinpw', 1, config)
+    assert_in_config('tds_version', '7.0', config)
+
+    config['config'] = {'odbc_opts': {'ansinpw': 1}}
+    config['odbc_opts'] = {'ansinpw': 0}
+    assert_in_config('ansinpw', 0, config)
+
+    config['config'] = {'odbc_opts': {'ansinpw': 1}}
+    config['odbc_opts'] = {'tds_version': '7.0'}
+    assert_in_config('tds_version', '7.0', config)
+    assert 'ansinpw' not in get_config(config)
