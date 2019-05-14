@@ -63,12 +63,92 @@ This role sets two variables as output:
 Notes
 -----
 **Important Note**
-This role delegates the querying task to localhost by default. If you want to run it in the remote machine instead, make sure to set the `delegate` argument when invoking it. Keep in mind that you will need all the ODBC requirements installed on that machine for it to work.
+This role delegates the querying task to localhost by default. If you want to
+run it in the remote machine instead, make sure to set the `delegate` argument
+when invoking it. Keep in mind that you will need all the ODBC requirements
+installed on that machine for it to work.
 
+FAQ
+---
+##### What databases are supported?
+Right now, only MySQL, SQL Server and Oracle
+
+##### What packages do I need to install?
+You will need to install these packages from your distro's repos:
+* CentOS / RedHat
+  * unixODBC-devel
+  * freetds-devel (for SQL server)
+  * mysql-connector-odbc (for MySQL)
+* Debian / Ubuntu
+  * unixodbc-dev
+  * tdsodbc (for SQL server)
+  * libmyodbc (download from MySQL's website)
+
+For Oracle support you will need to install the instantclient driver from
+[Oracle's website](https://www.oracle.com/technetwork/database/database-technologies/instant-client/downloads/index.html)
+
+Then you you must install `pyodbc` using pip. It is important that you do this
+AFTER installing the odbc binaries or pip will fail.
+
+If you are having trouble connecting to SQL Server databases with your
+ActiveDirectory user, find a newer package or compile freetds from source.
+Older versions won't work well for this case, especially before v1.0.
+
+##### How do I avoid SQL injections?
+Do not use ansible's string interpolation for your SQL queries. Instead, put a
+`?` wherever you want to substitute a variable, and then pass the list of
+values with the `values: ` keyword. So instead of this:
+```yml
+...
+  query: "select * from users where name={{ username }}"
+```
+use this:
+```yml
+...
+  query: "select * from users where name=?"
+  values:
+    - "{{ username }}"
+```
+
+##### How can I run queries in an ansible loop?
+Unfortunately, as of version 2.7, ansible doesn't support including roles in a
+loop. For performance reasons, I suggest you rethink your query and see if you
+can use SQL cursors to do everything with a single role include.
+
+If you find that confusing or you really need to run queries in an ansible
+loop, you will need to invoke the `sql_query` module directly, instead of
+including the role. Here's an example:
+```yml
+- name: Insert multiple things
+  delegate_to: localhost  # This is important!
+  sql_query:
+    servername: ...
+    # username, pasword and all that
+    query: 'insert into table values (?)'
+  loop:
+    - value1
+    - value2
+    - value3
+```
+
+Keep in mind that, by invoking the module directly you lose the `query_rows`
+variable, and you will need to manually `register: ` the result yourself. Also,
+don't forget to `delegate_to: localhost` to run the actual module code in your
+local machine instead of the remote server.
+
+##### Can I use a custom ODBC DSN?
+Yes, just use the `dsn:` argument. There is no need to specify dbtype,
+servername or any other parameters that you may have defined in your
+`odbcinst.ini`.
+
+##### I want to pass extra ODBC options
+Of course. Just use the `odbc_opts` argument to pass a dictionary with any
+extra ODBC parameters. They will all be appended to the connection string in
+the end.
 
 Examples
 ----------------
-
+Here's a list of complete invocation examples, for all your copying and pasting needs.
 ```yml
 # Run a simple query
 - name: Execute query
