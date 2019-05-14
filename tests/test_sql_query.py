@@ -59,17 +59,6 @@ class FakeCursor:
             self.fetchall = raise_error
 
 
-class FakeModule:
-    def __init__(self, params=None):
-        self.params = params or {}
-
-    def exit_json(self, **kwargs):
-        raise SystemExit('exit_json: {}'.format(kwargs))
-
-    def fail_json(self, **kwargs):
-        raise SystemExit('fail_json: {}'.format(kwargs))
-
-
 @pytest.fixture
 def drivers(monkeypatch):
     drivers = {k: k for k in DRIVERS}
