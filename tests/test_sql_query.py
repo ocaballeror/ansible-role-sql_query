@@ -20,6 +20,7 @@ from library.sql_query import ModuleError
 from library.sql_query import get_config
 from library.sql_query import find_drivers
 from library.sql_query import connection_string
+from library.sql_query import oracle_string
 
 
 INTERNAL_CONFIG = {
@@ -264,7 +265,7 @@ def test_dsn_config(config, drivers):
 def assert_in_config(key, value, config):
     parsed = get_config(config)
     assert parsed[key] == value
-    connstr = connection_string(parsed).lower() + ';'
+    connstr = ';' + connection_string(parsed).lower() + ';'
     assert ';{}={};'.format(key, value) in connstr
 
 
@@ -291,3 +292,31 @@ def test_odbc_opts_config(drivers):
     config['odbc_opts'] = {'tds_version': '7.0'}
     assert_in_config('tds_version', '7.0', config)
     assert 'ansinpw' not in get_config(config)
+
+
+def test_oracle_string(drivers):
+    config = PARAM_CONFIG.copy()
+    config['dbtype'] = 'oracle'
+    parsed = get_config(config)
+    for key, value in config.items():
+        assert parsed[ARG_MAPPING[key]] == value
+
+    connstr = connection_string(parsed).lower()
+    arg_mapping = ARG_MAPPING.copy()
+    arg_mapping['database'] = 'sid'
+    arg_mapping['servername'] = 'host'
+    for key, value in config.items():
+        key = arg_mapping[key]
+        assert '{}={}'.format(key, value) in connstr
+    assert 'port=1521' in connstr
+
+
+def test_oracle_string_port(drivers):
+    config = PARAM_CONFIG.copy()
+    config['dbtype'] = 'oracle'
+    config['port'] = 12345
+
+    parsed = get_config(config)
+    assert parsed['port'] == 12345
+    connstr = connection_string(parsed).lower()
+    assert 'port=12345' in connstr
