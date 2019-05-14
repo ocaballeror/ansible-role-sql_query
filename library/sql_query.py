@@ -307,8 +307,8 @@ def get_config(params):
             config[v] = config.pop(k)
         if params.get(k, None):
             config[v] = params[k]
-    for k, v in config.get('odbc_opts', {}).items():
-        config[k] = v
+    config.update(config.pop('odbc_opts', {}))
+
     require_args(config, ['uid', 'pwd'])
 
     if config.get('dsn', False):
