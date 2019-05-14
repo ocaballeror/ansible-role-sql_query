@@ -9,6 +9,7 @@
       password: "{{ password | default('') }}"
       dbtype: "{{ dbtype | default('') }}"
       dsn: "{{ dsn | default('') }}"
+      port: "{{ port | default(0) }}"
       query: "{{ query | default('') }}"
       values: "{{ values | default([]) }}"
   register: sql_query_output
