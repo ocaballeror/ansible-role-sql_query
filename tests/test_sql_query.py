@@ -264,7 +264,7 @@ def test_dsn_config_error(config):
         },
     ],
 )
-def test_dsn_config(config):
+def test_dsn_config(config, drivers):
     parsed = get_config(config)
     connstr = connection_string(parsed).lower() + ';'
     assert 'dsn' in connstr
@@ -280,7 +280,7 @@ def assert_in_config(key, value, config):
     assert ';{}={};'.format(key, value) in connstr
 
 
-def test_odbc_opts():
+def test_odbc_opts(drivers):
     config = PARAM_CONFIG.copy()
     opts = {'ansinpw': 1, 'tds_version': '7.0'}
     config['odbc_opts'] = opts
@@ -288,7 +288,7 @@ def test_odbc_opts():
     assert_in_config('tds_version', '7.0', config)
 
 
-def test_odbc_opts_config():
+def test_odbc_opts_config(drivers):
     config = PARAM_CONFIG.copy()
     opts = {'ansinpw': 1, 'tds_version': '7.0'}
     config['config'] = {'odbc_opts': opts}
