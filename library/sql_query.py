@@ -207,6 +207,7 @@ def find_drivers():
         parser.read_file(f)
 
     DRIVERS['mysql'] = best_driver(parser, 'mysql')
+    DRIVERS['oracle'] = best_driver(parser, 'oracle')
     DRIVERS['mssql'] = best_driver(parser, 'freetds')
     if not DRIVERS['mssql']:
         DRIVERS['mssql'] = best_driver(parser, 'sql server')
