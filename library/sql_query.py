@@ -303,7 +303,7 @@ def get_config(params):
     config = params.get('config', None) or {}
     config = config.copy()
     for k, v in ARG_MAPPING.items():
-        if k in config:
+        if config.get(k, None):
             config[v] = config.pop(k)
         if params.get(k, None):
             config[v] = params[k]
