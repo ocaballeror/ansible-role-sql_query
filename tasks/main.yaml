@@ -2,14 +2,14 @@
 - name: Run query
   delegate_to: "{{ delegate | default('localhost') }}"
   sql_query:
-      config: "{{ config | default({}) }}"
-      servername: "{{ servername | default('') }}"
-      database: "{{ database | default('') }}"
-      username: "{{ username | default('') }}"
-      password: "{{ password | default('') }}"
-      dbtype: "{{ dbtype | default('') }}"
-      dsn: "{{ dsn | default('') }}"
+      config: "{{ config | default(omit) }}"
+      servername: "{{ servername | default(omit) }}"
+      database: "{{ database | default(omit) }}"
+      username: "{{ username | default(omit) }}"
+      password: "{{ password | default(omit) }}"
+      dbtype: "{{ dbtype | default(omit) }}"
+      dsn: "{{ dsn | default(omit) }}"
       port: "{{ port | default(0) | int }}"
-      query: "{{ query | default('') }}"
-      values: "{{ values | default([]) }}"
+      query: "{{ query | default(omit) }}"
+      values: "{{ values | default(omit) }}"
   register: sql_query_output
