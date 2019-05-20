@@ -368,6 +368,7 @@ def run_module():
 
     result['changed'] = modified
     result['output'] = results
+    result['ansible_facts'] = {'query_rows': results}
 
     # in the event of a successful module execution, you will want to
     # simple AnsibleModule.exit_json(), passing the key/value results
