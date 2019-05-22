@@ -156,7 +156,7 @@ output:
 '''
 
 ODBCINST = '/etc/odbcinst.ini'
-DRIVERS = {'mysql': None, 'mssql': None}
+DRIVERS = {'mysql': None, 'mssql': None, 'oracle': None}
 ARG_MAPPING = {
     'dsn': 'dsn',
     'username': 'uid',
@@ -226,12 +226,27 @@ def connect(config, autocommit=True):
 
 def connection_string(config):
     driver = config.get('driver', '').lower()
-    if driver == DRIVERS['mssql'].lower() and '\\' in config.get('uid', ''):
-        config['Disable loopback check'] = 'yes'
-    template = ";".join(
-        '{}={}'.format(k.upper(), v) for k, v in config.items()
-    )
+    if driver == DRIVERS['oracle'].lower():
+        template = oracle_string(config)
+    else:
+        mssql = DRIVERS['mssql'].lower()
+        if driver == mssql and '\\' in config.get('uid', ''):
+            config['Disable loopback check'] = 'yes'
+        template = ";".join(
+            '{}={}'.format(k.upper(), v) for k, v in config.items()
+        )
     return template
+
+
+def oracle_string(config):
+    """
+    Build and return an Oracle connection string.
+    """
+    config['port'] = config.get('port', 1521)
+    dbq = '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={server})(PORT={port}))'
+    dbq += '(CONNECT_DATA=(SID={database})))'
+    template = 'DRIVER={driver};DBQ=%s;UID={uid};PWD={pwd};' % dbq
+    return template.format(**config)
 
 
 def row_to_dict(row):
