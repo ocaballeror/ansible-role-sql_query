@@ -158,7 +158,7 @@ output:
 '''
 
 ODBCINST = ['/etc/odbcinst.ini', '/usr/local/etc/odbcinst.ini', '~/.odbc.ini']
-DRIVERS = {'mysql': None, 'mssql': None, 'oracle': None}
+DRIVERS = {'mysql': '', 'mssql': '', 'oracle': ''}
 ARG_MAPPING = {
     'dsn': 'dsn',
     'username': 'uid',
@@ -195,7 +195,7 @@ def best_driver(parser, search):
         versions.append((version, section))
 
     if not versions:
-        return None
+        return ''
     best = sorted(versions, reverse=True)[0][-1]
     return '{{{}}}'.format(best)
 
@@ -232,11 +232,14 @@ def connect(config, autocommit=True):
 
 
 def connection_string(config):
+    has_driver = bool(config.get('driver', '') or config.get('dsn', ''))
+    assert has_driver, 'No driver specified'
+
     driver = config.get('driver', '').lower()
-    if driver == DRIVERS['oracle'].lower():
+    if driver and driver == DRIVERS.get('oracle', '').lower():
         template = oracle_string(config)
     else:
-        mssql = DRIVERS['mssql'].lower()
+        mssql = DRIVERS.get('mssql', '').lower()
         if driver == mssql and '\\' in config.get('uid', ''):
             config['Disable loopback check'] = 'yes'
         template = ";".join(
