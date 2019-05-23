@@ -320,3 +320,23 @@ def test_oracle_string_port(drivers):
     assert parsed['port'] == 12345
     connstr = connection_string(parsed).lower()
     assert 'port=12345' in connstr
+
+
+def test_connection_string_nodriver():
+    """
+    Check that connection_string() raises an AssertionError when no driver is
+    specified (which shouldn't happen, by the way).
+    """
+    with pytest.raises(AssertionError):
+        connection_string({})
+
+    with pytest.raises(AssertionError):
+        connection_string({'server': 's', 'username': 'u'})
+
+
+def test_connection_string_emptydrivers():
+    """
+    Check that connection_string() doesn't fail when the driver list is empty.
+    """
+    string = connection_string({'driver': 'd', 'server': 's'})
+    assert string.lower() == 'driver=d;server=s'
