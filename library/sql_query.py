@@ -365,6 +365,8 @@ def run_module():
         config = get_config(module.params)
         query, values = module.params['query'], module.params['values']
         results, modified = run_query(query, values, config)
+    except ModuleError as e:
+        module.fail_json(msg=str(e), **result)
     except Exception as e:
         msg = '{}: {}'.format(type(e), str(e))
         module.fail_json(msg=msg, **result)
