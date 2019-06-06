@@ -21,6 +21,7 @@ from library.sql_query import get_config
 from library.sql_query import find_drivers
 from library.sql_query import connection_string
 from library.sql_query import oracle_string
+from library.sql_query import row_to_dict
 
 
 INTERNAL_CONFIG = {
@@ -161,6 +162,17 @@ def test_get_config_invalid_database():
     assert 'must be one of' in str(error.value)
 
 
+def test_get_config_invalid_driver(monkeypatch):
+    """
+    Check that get_config raises an error when using a dbtype that has no
+    associated driver.
+    """
+    monkeypatch.setitem(sql_query.DRIVERS, 'mssql', '')
+    with pytest.raises(ModuleError) as error:
+        get_config(PARAM_CONFIG.copy())
+        assert 'no driver' in str(error.value).lower()
+
+
 def assert_driver(monkeypatch, keys, expect, driver):
     with NamedTemporaryFile(mode='w+') as tmp:
         for key in keys:
@@ -169,6 +181,18 @@ def assert_driver(monkeypatch, keys, expect, driver):
         monkeypatch.setattr(sql_query, 'ODBCINST', [tmp.name])
         find_drivers()
         assert sql_query.DRIVERS[driver] == expect
+
+
+def test_find_driver_error(tmp_path, monkeypatch):
+    ini = tmp_path / 'odbc.ini'
+    monkeypatch.setattr(sql_query, 'ODBCINST', [ini])
+    find_drivers()
+    assert all(not value for key, value in sql_query.DRIVERS.items())
+
+    ini.write_text("this is not valid ini format")
+    with pytest.raises(Exception):
+        find_drivers()
+    assert all(not value for key, value in sql_query.DRIVERS.items())
 
 
 @pytest.mark.parametrize(
@@ -340,3 +364,35 @@ def test_connection_string_emptydrivers():
     """
     string = connection_string({'driver': 'd', 'server': 's'})
     assert string.lower() == 'driver=d;server=s'
+
+
+def test_connection_string_mssql(drivers):
+    """
+    Check that some keys are present in a mssql connection string.
+    """
+    driver = sql_query.DRIVERS['mssql']
+    string = connection_string({'driver': driver, 'uid': 'someuser'}).lower()
+    assert 'driver={}'.format(driver) in string
+    assert 'uid=someuser' in string
+    assert 'disable loopback check' not in string
+
+    string = connection_string({'driver': driver, 'uid': r'dom\user'}).lower()
+    assert 'driver={}'.format(driver) in string
+    assert r'uid=dom\user' in string
+    assert 'disable loopback check=yes' in string
+
+
+def test_row_to_dict():
+    class Row:
+        def __init__(self, values):
+            self.values = values
+            self._iter = iter(self.values)
+
+        def __iter__(self):
+            return iter(self.values)
+
+    row = Row(['value1', 'value2'])
+    row.cursor_description = (('col1', ''), ('col2', ''))
+
+    assert row_to_dict(None) is None
+    assert row_to_dict(row) == {'col1': 'value1', 'col2': 'value2'}
