@@ -330,7 +330,7 @@ def get_config(params):
     return config
 
 
-def run_module():
+def setup_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
         config=dict(type='dict', required=False),
@@ -346,13 +346,17 @@ def run_module():
         values=dict(type='list', required=False, default=[]),
     )
 
-    result = dict(changed=False, output='')
-
     # the AnsibleModule object will be our abstraction working with Ansible
     # this includes instantiation, a couple of common attr would be the
     # args/params passed to the execution, as well as if the module
     # supports check mode
     module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
+    return module
+
+
+def run_module():
+    result = dict(changed=False, output='')
+    module = setup_module()
 
     # if the user is working with this module in only check mode we do not
     # want to make any changes to the environment, just return the current
