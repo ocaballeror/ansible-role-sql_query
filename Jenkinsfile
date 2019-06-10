@@ -1,28 +1,29 @@
 pipeline {
 	agent any
+	environment {
+		PATH="/opt/python3/bin:${env.PATH}"
+	}
 	stages {
 		stage('Setup') {
 			steps {
-				sh "/opt/python3/bin/pip install --upgrade -r requirements_dev.txt"
-				sh "/opt/python2/bin/pip install --upgrade -r requirements_dev.txt"
+				sh "pip install --upgrade tox"
 			}
 		}
 		stage('Lint') {
 			steps {
-				// Verify module documentation
-				sh "/opt/python3/bin/ansible-lint ."
-				// Lint ansible
-				sh "ANSIBLE_LIBRARY=library /opt/python3/bin/ansible-doc -t module sql_query"
-				// Lint python code
-				sh "/opt/python3/bin/flake8 --select=E,F,W,N,B,B902,T"
+				sh "tox -e lint2,lint3"
+			}
+		}
+		stage('Docs') {
+			steps {
+				sh "tox -e docs"
 			}
 		}
 		stage('Test') {
 			steps {
 				ansiColor('xterm') {
 					sh "rm -f .coverage"
-					sh "/opt/python3/bin/pytest -v -rs --cov --color=yes"
-					sh "/opt/python2/bin/pytest -v -rs --cov --color=yes"
+					sh "tox -e py2,py3"
 				}
 			}
 		}
