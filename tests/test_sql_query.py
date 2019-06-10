@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import warnings
 from io import StringIO
 from tempfile import NamedTemporaryFile
 
@@ -226,16 +227,19 @@ def assert_driver(monkeypatch, keys, expect, driver):
         assert sql_query.DRIVERS[driver] == expect
 
 
-def test_find_driver_error(tmp_path, monkeypatch):
+def test_find_driver_error(tmp_path, monkeypatch, recwarn):
+    warnings.simplefilter("always")
     ini = tmp_path / 'odbc.ini'
     monkeypatch.setattr(sql_query, 'ODBCINST', [ini])
     find_drivers()
     assert all(not value for key, value in sql_query.DRIVERS.items())
+    assert recwarn.pop(UserWarning)
 
     ini.write_text("this is not valid ini format")
     with pytest.raises(Exception):
         find_drivers()
     assert all(not value for key, value in sql_query.DRIVERS.items())
+    assert len(recwarn) == 0
 
 
 @pytest.mark.parametrize(
