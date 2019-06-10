@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 import sys
 import json
@@ -25,6 +27,13 @@ from library.sql_query import find_drivers
 from library.sql_query import connection_string
 from library.sql_query import oracle_string
 from library.sql_query import row_to_dict
+
+
+if sys.version_info >= (3,):
+    unicode = str
+    from configparser import Error as ConfigError
+else:
+    from ConfigParser import Error as ConfigError
 
 
 INTERNAL_CONFIG = {
@@ -230,13 +239,13 @@ def assert_driver(monkeypatch, keys, expect, driver):
 def test_find_driver_error(tmp_path, monkeypatch, recwarn):
     warnings.simplefilter("always")
     ini = tmp_path / 'odbc.ini'
-    monkeypatch.setattr(sql_query, 'ODBCINST', [ini])
+    monkeypatch.setattr(sql_query, 'ODBCINST', [str(ini)])
     find_drivers()
     assert all(not value for key, value in sql_query.DRIVERS.items())
     assert recwarn.pop(UserWarning)
 
     ini.write_text("this is not valid ini format")
-    with pytest.raises(Exception):
+    with pytest.raises(ConfigError):
         find_drivers()
     assert all(not value for key, value in sql_query.DRIVERS.items())
     assert len(recwarn) == 0
@@ -410,7 +419,8 @@ def test_connection_string_emptydrivers():
     Check that connection_string() doesn't fail when the driver list is empty.
     """
     string = connection_string({'driver': 'd', 'server': 's'})
-    assert string.lower() == 'driver=d;server=s'
+    string = string.lower()
+    assert string in ('driver=d;server=s', 'server=s;driver=d')
 
 
 def test_connection_string_mssql(drivers):
@@ -423,9 +433,9 @@ def test_connection_string_mssql(drivers):
     assert 'uid=someuser' in string
     assert 'disable loopback check' not in string
 
-    string = connection_string({'driver': driver, 'uid': r'dom\user'}).lower()
+    string = connection_string({'driver': driver, 'uid': 'dom\\user'}).lower()
     assert 'driver={}'.format(driver) in string
-    assert r'uid=dom\user' in string
+    assert 'uid=dom\\user' in string
     assert 'disable loopback check=yes' in string
 
 
@@ -476,9 +486,9 @@ def test_setup_module(monkeypatch, tmp_path):
     module_args.update(PARAM_CONFIG)
     args = {'ANSIBLE_MODULE_ARGS': module_args}
 
-    in_file = tmp_path / 'json.json'
-    in_file.write_text(json.dumps(args))
-    new_argv = [__file__, in_file.absolute()]
+    in_file = tmp_path.absolute() / 'json.json'
+    in_file.write_text(unicode(json.dumps(args)))
+    new_argv = [__file__, str(in_file)]
     monkeypatch.setattr(sys, 'argv', new_argv)
 
     module = sql_query.setup_module()

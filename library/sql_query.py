@@ -2,9 +2,15 @@
 from __future__ import unicode_literals
 import re
 import os
+import sys
 import warnings
-from configparser import ConfigParser
 from contextlib import contextmanager
+
+if sys.version_info >= (3,):
+    from configparser import ConfigParser
+else:
+    from ConfigParser import ConfigParser
+
 
 import pyodbc
 from ansible.module_utils.basic import AnsibleModule
