@@ -20,8 +20,9 @@ pipeline {
 		stage('Test') {
 			steps {
 				ansiColor('xterm') {
-					sh "/opt/python3/bin/pytest -v -rs --color=yes"
-					sh "/opt/python2/bin/pytest -v -rs --color=yes"
+					sh "rm -f .coverage"
+					sh "/opt/python3/bin/pytest -v -rs --cov --color=yes"
+					sh "/opt/python2/bin/pytest -v -rs --cov --color=yes"
 				}
 			}
 		}
