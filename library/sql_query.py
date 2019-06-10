@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import re
 import os
+import warnings
 from configparser import ConfigParser
 from contextlib import contextmanager
 
@@ -204,13 +205,12 @@ def find_drivers():
     """
     Fill the DRIVERS dictionary with the best driver for every db type.
     """
+    files = [os.path.expanduser(f) for f in ODBCINST]
     parser = ConfigParser()
-    for filename in ODBCINST:
-        filename = os.path.expanduser(filename)
-        if not os.path.isfile(filename):
-            continue
-        with open(filename) as f:
-            parser.read_file(f)
+    good_files = parser.read(files)
+    if not good_files:
+        warnings.warn('No ODBC configuration could be read')
+        return
 
     DRIVERS['mysql'] = best_driver(parser, 'mysql')
     DRIVERS['oracle'] = best_driver(parser, 'oracle')
