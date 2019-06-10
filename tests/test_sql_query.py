@@ -24,7 +24,6 @@ from library.sql_query import ModuleError
 from library.sql_query import get_config
 from library.sql_query import find_drivers
 from library.sql_query import connection_string
-from library.sql_query import oracle_string
 from library.sql_query import row_to_dict
 
 
