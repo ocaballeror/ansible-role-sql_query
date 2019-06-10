@@ -12,7 +12,6 @@ import pyodbc
 import pytest
 from ansible.module_utils.basic import AnsibleModule
 
-# flake8: noqa: E402
 root = (os.path.split(__file__)[0] or '.') + '/..'
 sys.path.append(root)
 from library import sql_query
