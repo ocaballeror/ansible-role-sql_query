@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 import yaml
 import pyodbc
 import pytest
+from ansible.module_utils.basic import AnsibleModule
 
 # flake8: noqa: E402
 root = (os.path.split(__file__)[0] or '.') + '/..'
@@ -41,8 +42,8 @@ PARAM_CONFIG = {
 }
 
 
-def raise_error():
-    raise pyodbc.Error
+def raise_error(*args, **kwargs):
+    raise pyodbc.Error('pyodbc error')
 
 
 class FakeCursor:
@@ -63,6 +64,24 @@ class FakeCursor:
             self.fetchall = lambda: []
         else:
             self.fetchall = raise_error
+
+
+class FakeModule:
+    def __init__(self, params=None, check_mode=False):
+        params = params or {}
+        self.params = params
+        self.check_mode = check_mode
+
+    def exit_json(self, **kwargs):
+        kwargs['changed'] = kwargs.get('changed', False)
+        print(json.dumps(kwargs))
+        sys.exit(0)
+
+    def fail_json(self, **kwargs):
+        kwargs['changed'] = kwargs.get('changed', False)
+        kwargs['failed'] = True
+        print(json.dumps(kwargs))
+        sys.exit(1)
 
 
 @pytest.fixture
@@ -420,3 +439,109 @@ def test_row_to_dict():
 
     assert row_to_dict(None) is None
     assert row_to_dict(row) == {'col1': 'value1', 'col2': 'value2'}
+
+
+def assert_run_module(capsys, changed, output=None, msg=None):
+    """
+    Invoke run_module() and check its output. It should write a JSON object to
+    stdout with specific values for results and changed.
+    """
+    failure = msg is None
+    with pytest.raises(SystemExit) as exit_code:
+        sql_query.run_module()
+        assert int(exit_code.value) == failure
+
+    captured = capsys.readouterr()
+    out = json.loads(captured.out)
+    assert out['changed'] is changed
+    if output is not None:
+        assert out['output'] == output
+        if output:
+            assert out['ansible_facts']['query_rows'] == output
+    elif msg is not None:
+        assert out['msg'] == msg
+        assert out['failed']
+
+
+def test_setup_module(monkeypatch, tmp_path):
+    """
+    Write the input configuration to a JSON file and append it to the argv list
+    so run_module() can find it.
+    """
+    module_args = {'query': 'drop table where name like ?', 'values': ['%%']}
+    module_args.update(PARAM_CONFIG)
+    args = {'ANSIBLE_MODULE_ARGS': module_args}
+
+    in_file = tmp_path / 'json.json'
+    in_file.write_text(json.dumps(args))
+    new_argv = [__file__, in_file.absolute()]
+    monkeypatch.setattr(sys, 'argv', new_argv)
+
+    module = sql_query.setup_module()
+    assert module
+    assert isinstance(module, AnsibleModule)
+    assert not module.check_mode
+    parsed = {
+        k: v
+        for k, v in module.params.items()
+        if v is not None or k in module_args
+    }
+    assert parsed == module_args
+
+
+def test_run_module(monkeypatch, tmp_path, capsys):
+    changed = True
+    results = ['results']
+    call_log = []
+
+    def fake_run_query(query, values, config):
+        call_log.append((query, values, config))
+        return results, changed
+
+    config = {'query': 'drop table where name like ?', 'values': ['%%']}
+    config.update(PARAM_CONFIG)
+    monkeypatch.setattr(sql_query, 'setup_module', lambda: FakeModule(config))
+    monkeypatch.setattr(sql_query, 'run_query', fake_run_query)
+    assert_run_module(capsys, changed, output=results)
+
+    expect_config = INTERNAL_CONFIG.copy()
+    expect_config['driver'] = sql_query.DRIVERS[config['dbtype']]
+    assert call_log == [(config['query'], config['values'], expect_config)]
+
+
+def test_run_module_check_mode(monkeypatch, tmp_path, capsys):
+    config = {
+        'query': 'drop table where name like ?',
+        'values': ['%%'],
+        '_ansible_check_mode': True,
+    }
+    config.update(PARAM_CONFIG)
+    module = FakeModule(config)
+    module.check_mode = True
+    monkeypatch.setattr(sql_query, 'setup_module', lambda: module)
+    assert_run_module(capsys, False, output='')
+
+
+def test_run_module_exception(monkeypatch, tmp_path, capsys):
+    """
+    Test run_module() when an exception is raised.
+    """
+    changed = False
+    error_msg = 'this is an error'
+
+    def fake_run_query(query, values, config):
+        raise ModuleError(error_msg)
+
+    config = {'query': 'drop table where name like ?', 'values': ['%%']}
+    config.update(PARAM_CONFIG)
+    monkeypatch.setattr(sql_query, 'setup_module', lambda: FakeModule(config))
+
+    # Raising a ModuleError should only print the error msg
+    monkeypatch.setattr(sql_query, 'run_query', fake_run_query)
+    assert_run_module(capsys, changed, msg=error_msg)
+
+    # Raising any other kind of error should print both the error type and its
+    # message
+    expect_msg = '{}: {}'.format(pyodbc.Error, 'pyodbc error')
+    monkeypatch.setattr(sql_query, 'run_query', raise_error)
+    assert_run_module(capsys, changed, msg=expect_msg)
