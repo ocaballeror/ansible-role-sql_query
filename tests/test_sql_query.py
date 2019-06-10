@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 from io import StringIO
 from tempfile import NamedTemporaryFile
 
@@ -54,6 +55,9 @@ class FakeCursor:
     def __exit__(self, *args):
         pass
 
+    def cursor(self):
+        return self
+
     def execute(self, query, *args):
         if query.lower().startswith('select'):
             self.fetchall = lambda: []
@@ -71,6 +75,26 @@ def test_docs():
     assert yaml.safe_load(StringIO(DOCUMENTATION))
     assert yaml.safe_load(StringIO(EXAMPLES))
     assert yaml.safe_load(StringIO(RETURN))
+
+
+def test_connect(monkeypatch, drivers):
+    """
+    Check that the connection function returns a "valid" cursor.
+
+    Sadly, there is no way to test the actual connection.
+    """
+
+    def fake_connect(conn_str, *args, **kwargs):
+        cur = FakeCursor()
+        cur.connection_string = conn_str
+        cur.__dict__.update(kwargs)
+        return cur
+
+    config = INTERNAL_CONFIG.copy()
+    monkeypatch.setattr(pyodbc, 'connect', fake_connect)
+    with sql_query.connect(config) as conn:
+        assert conn
+        assert conn.connection_string == connection_string(config)
 
 
 def test_run_query(monkeypatch):
