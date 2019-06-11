@@ -132,10 +132,10 @@ including the role. Here's an example:
     - value3
 ```
 
-Keep in mind that, by invoking the module directly you lose the `query_rows`
-variable, and you will need to manually `register: ` the result yourself. Also,
-don't forget to `delegate_to: localhost` to run the actual module code in your
-local machine instead of the remote server.
+When invoking the module directly, don't forget to `delegate_to: localhost` to
+run the actual module code in your local machine instead of the remote server.
+It is important that you do this, since most of the times, the remote machine
+will not have the required ODBC dependencies in order to run this.
 
 ##### Can I use a custom ODBC DSN?
 Yes, just use the `dsn:` argument. There is no need to specify dbtype,
