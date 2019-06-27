@@ -339,7 +339,7 @@ def get_config(params):
 def setup_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
-        config=dict(type='dict', required=False),
+        config=dict(type='dict', required=False, no_log=True),
         dsn=dict(type='str', required=False),
         servername=dict(type='str', required=False),
         port=dict(type='int', required=False),
