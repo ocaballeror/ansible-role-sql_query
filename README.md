@@ -4,7 +4,7 @@ Run query
 Execute a SQL query on a database.
 
 Supported database types (any reasonably recent version should work):
-- MySQL (Tested versions 5 and 8)
+- MySQL (Tested versions 5 and 8&#8203;)
 - SQL Server (Tested 2012, 2014, 2016 and linux v17)
 - Oracle (experimental. Only version 18 tested)
 
@@ -124,9 +124,10 @@ including the role. Here's an example:
 - name: Insert multiple things
   delegate_to: localhost  # This is important!
   sql_query:
-    servername: ...
-    # username, pasword and all that
-    query: 'insert into table values (?)'
+    ... # servername, username, pasword and all that
+    query: insert into table (column) values (?)
+    values:
+      - "{{ item }}"
   loop:
     - value1
     - value2
