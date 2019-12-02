@@ -2,6 +2,7 @@ pipeline {
     agent any
     environment {
         PATH="/opt/python3/bin:${env.PATH}"
+        TOX_PARALLEL_NO_SPINNER=1
     }
     stages {
         stage('Setup') {
@@ -20,7 +21,7 @@ pipeline {
         }
         stage('Lint') {
             steps {
-                sh "tox -e lint2,lint3"
+                sh "tox -p 2 -e lint2,lint3"
             }
         }
         stage('Test') {
