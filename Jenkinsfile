@@ -6,6 +6,8 @@ pipeline {
     stages {
         stage('Setup') {
             steps {
+                // Delete .tox if the requirements files have changed since the last build
+                sh "[ -z \"$GIT_COMMIT\" ] || [ -z \"$GIT_PREVIOUS_COMMIT\" ] || git diff --exit-code -s $GIT_COMMIT $GIT_PREVIOUS_COMMIT -- requirements.txt setup.py || rm -rf .tox"
                 sh "pip install --upgrade tox"
             }
         }
