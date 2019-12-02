@@ -22,8 +22,17 @@ pipeline {
         stage('Test') {
             steps {
                 ansiColor('xterm') {
-                    sh "rm -f .coverage"
-                    sh "tox -e py2,py3"
+                    sh """
+                    rm -rf .coverage .coverage.* reports
+                    mkdir -p reports
+                    tox -e py2 -- --junitxml=reports/report_py2.xml
+                    tox -e py3 -- --junitxml=reports/report_py3.xml
+                    """
+                }
+            }
+            post {
+                always {
+                    junit "reports/*"
                 }
             }
         }
