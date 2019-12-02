@@ -36,7 +36,11 @@ pipeline {
             }
             post {
                 always {
-                    junit "reports/*"
+                    script {
+                        try {
+                            junit "reports/*"
+                        } catch(_) {}
+                    }
                 }
             }
         }
