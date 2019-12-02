@@ -501,7 +501,7 @@ def test_setup_module(monkeypatch, tmp_path):
     assert parsed == module_args
 
 
-def test_run_module(monkeypatch, tmp_path, capsys):
+def test_run_module(monkeypatch, capsys):
     changed = True
     results = ['results']
     call_log = []
@@ -521,7 +521,7 @@ def test_run_module(monkeypatch, tmp_path, capsys):
     assert call_log == [(config['query'], config['values'], expect_config)]
 
 
-def test_run_module_check_mode(monkeypatch, tmp_path, capsys):
+def test_run_module_check_mode(monkeypatch, capsys):
     config = {
         'query': 'drop table where name like ?',
         'values': ['%%'],
@@ -534,7 +534,7 @@ def test_run_module_check_mode(monkeypatch, tmp_path, capsys):
     assert_run_module(capsys, False, output='')
 
 
-def test_run_module_exception(monkeypatch, tmp_path, capsys):
+def test_run_module_exception(monkeypatch, capsys):
     """
     Test run_module() when an exception is raised.
     """
