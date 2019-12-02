@@ -1,5 +1,5 @@
-Run query
-=========
+Ansible role: SQL Query
+======================
 
 Execute a SQL query on a database.
 
