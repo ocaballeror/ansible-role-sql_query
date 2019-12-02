@@ -4,6 +4,7 @@ Run query
 Execute a SQL query on a database.
 
 Supported database types (any reasonably recent version should work):
+
 - MySQL (Tested versions 5 and 8&#8203;)
 - SQL Server (Tested 2012, 2014, 2016 and linux v17)
 - Oracle (experimental. Only version 18 tested)
@@ -11,14 +12,15 @@ Supported database types (any reasonably recent version should work):
 Requirements
 ------------
 
-* UnixODBC and pyodbc must be installed.
-* The FreeTDS driver is needed for SQL Server connections.
-* The MySQL ODBC driver is needed for MySQL connections.
+- UnixODBC and pyodbc must be installed.
+- The FreeTDS driver is needed for SQL Server connections.
+- The MySQL ODBC driver is needed for MySQL connections.
 
 Role Variables
 --------------
 
 ### Module parameters
+
 - `config`: A dictionary with all the database configuration parameters
   described below
 
@@ -60,9 +62,9 @@ This role sets two variables as output:
 - `query_rows`: If the query returns results, contains the list of returned rows
   as `key=value` dictionaries
 
-
 Notes
 -----
+
 **Important Note**
 This role delegates the querying task to localhost by default. If you want to
 run it in the remote machine instead, make sure to set the `delegate` argument
@@ -71,20 +73,23 @@ installed on that machine for it to work.
 
 FAQ
 ---
-##### What databases are supported?
+
+#### What databases are supported?
+
 Right now, only MySQL, SQL Server and Oracle (experimental)
 
 ##### I want to run this locally
 If you want to run this role locally you will need these packages from your
 distro's repos:
-* CentOS / RedHat
-  * unixODBC-devel
-  * freetds-devel (for SQL server)
-  * mysql-connector-odbc (for MySQL)
-* Debian / Ubuntu
-  * unixodbc-dev
-  * tdsodbc (for SQL server)
-  * libmyodbc (download from MySQL's website)
+
+- CentOS / RedHat
+  - unixODBC-devel
+  - freetds-devel (for SQL server)
+  - mysql-connector-odbc (for MySQL)
+- Debian / Ubuntu
+  - unixodbc-dev
+  - tdsodbc (for SQL server)
+  - libmyodbc (download from MySQL's website)
 
 For Oracle support you will need to install the instantclient driver from
 [Oracle's website](https://www.oracle.com/technetwork/database/database-technologies/instant-client/downloads/index.html)
@@ -97,22 +102,27 @@ ActiveDirectory user, find a newer package or compile freetds from source.
 Older versions won't work well for this case, especially before v1.0.
 
 ##### How do I avoid SQL injections?
+
 Do not use ansible's string interpolation for your SQL queries. Instead, put a
 `?` wherever you want to substitute a variable, and then pass the list of
 values with the `values: ` keyword. So instead of this:
+
 ```yml
 ...
-  query: "select * from users where name={{ username }}"
+query: "select * from users where name={{ username }}"
 ```
+
 use this:
+
 ```yml
 ...
-  query: "select * from users where name=?"
-  values:
-    - "{{ username }}"
+query: "select * from users where name=?"
+values:
+  - "{{ username }}"
 ```
 
 ##### How can I run queries in an ansible loop?
+
 Unfortunately, as of version 2.7, ansible doesn't support including roles in a
 loop. For performance reasons, I suggest you rethink your query and see if you
 can use SQL cursors to do everything with a single role include.
@@ -120,6 +130,7 @@ can use SQL cursors to do everything with a single role include.
 If you find that confusing or you really need to run queries in an ansible
 loop, you will need to invoke the `sql_query` module directly, instead of
 including the role. Here's an example:
+
 ```yml
 - name: Insert multiple things
   delegate_to: localhost  # This is important!
@@ -140,18 +151,22 @@ It is important that you do this, since most of the times, the remote machine
 will not have the required ODBC dependencies in order to run this.
 
 ##### Can I use a custom ODBC DSN?
+
 Yes, just use the `dsn:` argument. There is no need to specify dbtype,
 servername or any other parameters that you may have defined in your
 `odbcinst.ini`.
 
 ##### I want to pass extra ODBC options
+
 Of course. Just use the `odbc_opts` argument to pass a dictionary with any
 extra ODBC parameters. They will all be appended to the connection string in
 the end.
 
 Examples
 ----------------
+
 Here's a list of complete invocation examples, for all your copying and pasting needs.
+
 ```yml
 # Run a simple query
 - name: Execute query
