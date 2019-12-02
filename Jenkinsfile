@@ -23,11 +23,6 @@ pipeline {
                 sh "tox -e lint2,lint3"
             }
         }
-        stage('Docs') {
-            steps {
-                sh "tox -e docs"
-            }
-        }
         stage('Test') {
             steps {
                 ansiColor('xterm') {
@@ -43,6 +38,11 @@ pipeline {
                 always {
                     junit "reports/*"
                 }
+            }
+        }
+        stage('Docs') {
+            steps {
+                sh "tox -e docs"
             }
         }
     }
