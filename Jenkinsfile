@@ -6,9 +6,16 @@ pipeline {
     stages {
         stage('Setup') {
             steps {
-                // Delete .tox if the requirements files have changed since the last build
-                sh "[ -z \"$GIT_COMMIT\" ] || [ -z \"$GIT_PREVIOUS_COMMIT\" ] || git diff --exit-code -s $GIT_COMMIT $GIT_PREVIOUS_COMMIT -- requirements.txt setup.py || rm -rf .tox"
-                sh "pip install --upgrade tox"
+                script{
+                    // Delete .tox if the requirements files have changed since the last build
+                    try {
+                        sh """
+                        if [ -n "$GIT_COMMIT" ] && [ -n "$GIT_PREVIOUS_COMMIT" ]; then
+                            git diff --exit-code -s "$GIT_COMMIT" "$GIT_PREVIOUS_COMMIT" -- requirements*.txt setup.py || rm -rf .tox
+                        fi
+                        """
+                    } catch(_) {}
+                }
             }
         }
         stage('Lint') {
