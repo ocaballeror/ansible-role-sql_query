@@ -33,6 +33,7 @@ pipeline {
                     tox -e py3 -- --junitxml=reports/report_py3.xml
                     """
                 }
+                sh ".tox/py3/bin/coverage report --fail-under 100"
             }
             post {
                 always {
