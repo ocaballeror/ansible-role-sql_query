@@ -3,6 +3,7 @@ pipeline {
     environment {
         PATH="/opt/python3/bin:${env.PATH}"
         TOX_PARALLEL_NO_SPINNER=1
+        ANSIBLE_LATEST="ansible29"
     }
     stages {
         stage('Setup') {
@@ -31,10 +32,10 @@ pipeline {
                     rm -rf .coverage .coverage.* reports
                     mkdir -p reports
                     tox -e "py3-test-ansible{27,28,29}" -- --junitxml=reports/report_py3.xml
-                    tox -e py2-test-ansible29 -- --junitxml=reports/report_py2.xml
+                    tox -e py2-test-$ANSIBLE_LATEST -- --junitxml=reports/report_py2.xml
                     """
                 }
-                sh ".tox/py3-test-ansible29/bin/coverage report --fail-under 100"
+                sh ".tox/py3-test-$ANSIBLE_LATEST/bin/coverage report --fail-under 100"
             }
             post {
                 always {
