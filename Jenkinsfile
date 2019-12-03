@@ -21,7 +21,7 @@ pipeline {
         }
         stage('Lint') {
             steps {
-                sh "tox -p 2 -e lint2,lint3"
+                sh "tox -p 2 -e py2-lint,py3-lint"
             }
         }
         stage('Test') {
@@ -30,11 +30,11 @@ pipeline {
                     sh """
                     rm -rf .coverage .coverage.* reports
                     mkdir -p reports
-                    tox -e py2 -- --junitxml=reports/report_py2.xml
-                    tox -e py3 -- --junitxml=reports/report_py3.xml
+                    tox -e "py3-test-ansible{27,28,29}" -- --junitxml=reports/report_py3.xml
+                    tox -e py2-test-ansible29 -- --junitxml=reports/report_py2.xml
                     """
                 }
-                sh ".tox/py3/bin/coverage report --fail-under 100"
+                sh ".tox/py3-test-ansible29/bin/coverage report --fail-under 100"
             }
             post {
                 always {
