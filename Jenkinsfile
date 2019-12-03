@@ -31,7 +31,7 @@ pipeline {
                     sh """
                     rm -rf .coverage .coverage.* reports
                     mkdir -p reports
-                    tox -e "py3-test-ansible{27,28,29}" -- --junitxml=reports/report_py3.xml
+                    tox -p auto -e "py3-test-ansible{27,28,29}" -- --junitxml=reports/report_py3.xml
                     tox -e py2-test-$ANSIBLE_LATEST -- --junitxml=reports/report_py2.xml
                     """
                 }
